@@ -1,6 +1,9 @@
+using System.Security.Claims;
+
+using Microsoft.AspNetCore.Authentication;
+
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -22,6 +25,21 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapControllers();
+// Mock Login
+app.MapGet("/login/{id}", async (string id, HttpContext context) => {
+    var claim = new Claim("id", id);
+
+    var identity = new ClaimsIdentity([claim], cookies);
+
+    var principal = new ClaimsPrincipal(identity);
+
+    await context.SignInAsync(principal);
+
+    return Results.Ok("Logged In");
+});
+
+app.MapGet("unauthorized", () => Results.Ok("UnAuthorized"));
+
+app.MapGet("secret", () => Results.Ok("Secret")).RequireAuthorization();
 
 app.Run();

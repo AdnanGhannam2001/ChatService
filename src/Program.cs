@@ -1,4 +1,7 @@
 using System.Security.Claims;
+using ChatService.Consumers;
+using MassTransit;
+using MassTransit.Configuration;
 
 using Microsoft.AspNetCore.Authentication;
 
@@ -13,7 +16,15 @@ builder.Services.AddAuthentication(cookies)
     .AddCookie(cookies);
 builder.Services.AddAuthorization();
 
+builder.Services.AddMassTransit(config => {
+    config.RegisterConsumer<GroupCreatedEventConsumer>();
+
+    config.UsingRabbitMq((context, rmqConfig) => {
+        rmqConfig.ReceiveEndpoint("group-created-event", e => e.ConfigureConsumer<GroupCreatedEventConsumer>(context));
+    });
+});
 var app = builder.Build();
+
 
 if (app.Environment.IsDevelopment()) {
     app.UseSwagger();

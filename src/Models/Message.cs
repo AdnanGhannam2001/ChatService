@@ -1,3 +1,5 @@
+using NanoidDotNet;
+
 namespace ChatService.Models;
 
 public sealed class Message {
@@ -5,10 +7,18 @@ public sealed class Message {
     private Message() { }
     #pragma warning restore CS8618
 
+    public Message(string chatId, string senderId, string content) {
+        Id = Nanoid.Generate(size: 15);
+        SenderId = senderId;
+        ChatId = chatId;
+        Content = content;
+        SentAt = LastUpdateAt = DateTime.UtcNow;
+    }
+
     public string Id { get; init; }
     public string SenderId { get; init; }
     public string ChatId { get; init; }
     public DateTime SentAt { get; init; }
-    public string Content { get; set; }
-    public DateTime LastUpdateAt { get; set; }
+    public string Content { get; private set; }
+    public DateTime LastUpdateAt { get; private set; }
 }

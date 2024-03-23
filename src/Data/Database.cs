@@ -27,9 +27,12 @@ public static class Database {
             CREATE TABLE IF NOT EXISTS "Messages" (
                 "Id" VARCHAR(255) NOT NULL,
                 "SenderId" VARCHAR(255) NOT NULL,
+                "ChatId" VARCHAR(255) NOT NULL,
                 "Content" VARCHAR(1000) NOT NULL, 
                 "SentAt" DATE,
-                PRIMARY KEY ("Id")
+                "LastUpdateAt" DATE,
+                PRIMARY KEY ("Id"),
+                FOREIGN KEY ("ChatId") REFERENCES "Chats"("Id")
             );
         """);
     }

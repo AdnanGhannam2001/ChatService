@@ -1,8 +1,8 @@
 using System.Security.Claims;
 using ChatService.Consumers;
+using ChatService.Data;
 using MassTransit;
 using MassTransit.Configuration;
-
 using Microsoft.AspNetCore.Authentication;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -23,6 +23,9 @@ builder.Services.AddMassTransit(config => {
         rmqConfig.ReceiveEndpoint("group-created-event", e => e.ConfigureConsumer<GroupCreatedEventConsumer>(context));
     });
 });
+
+builder.Services.AddScoped<DapperDbConnection>();
+
 var app = builder.Build();
 
 

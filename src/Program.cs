@@ -28,6 +28,25 @@ builder.Services.AddScoped<DapperDbConnection>();
 
 var app = builder.Build();
 
+if (args.Contains("--create-db")) {
+    using var scope = app.Services.GetRequiredService<IServiceScopeFactory>().CreateScope();
+    var dbConnection = scope.ServiceProvider.GetRequiredService<DapperDbConnection>();
+    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+    logger.LogInformation("Creating Tables...");
+    await Database.CreateTablesAsync(dbConnection);
+    logger.LogInformation("Tables Were Created Successfully");
+    return;
+}
+
+if (args.Contains("--seed")) {
+    using var scope = app.Services.GetRequiredService<IServiceScopeFactory>().CreateScope();
+    var dbConnection = scope.ServiceProvider.GetRequiredService<DapperDbConnection>();
+    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+    logger.LogInformation("Seeding...");
+    await Database.SeedAsync(dbConnection);
+    logger.LogInformation("Database Were Seeded Successfully");
+    return;
+}
 
 if (app.Environment.IsDevelopment()) {
     app.UseSwagger();

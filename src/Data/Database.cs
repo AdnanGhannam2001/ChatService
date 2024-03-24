@@ -18,6 +18,7 @@ public static class Database {
             CREATE TABLE IF NOT EXISTS "Members" (
                 "ChatId" VARCHAR(255) NOT NULL,
                 "UserId" VARCHAR(255) NOT NULL,
+                "Role" INTEGER NOT NULL,
                 PRIMARY KEY ("ChatId", "UserId"),
                 FOREIGN KEY ("ChatId") REFERENCES "Chats"("Id")
             );

@@ -5,8 +5,7 @@ public static class MembersQueries {
     
     public const string Add = $"""
         INSERT INTO "{_table}" ("ChatId", "UserId", "Role")
-        VALUES (@ChatId, @UserId, @Role)
-        RETURNING "_computed";
+        VALUES (@ChatId, @UserId, @Role);
     """;
 
     public const string Delete = $"""

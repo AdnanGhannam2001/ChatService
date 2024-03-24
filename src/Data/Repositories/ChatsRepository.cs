@@ -5,6 +5,7 @@ using ChatService.Models;
 using Dapper;
 using Npgsql;
 using PR2.Shared.Common;
+using PR2.Shared.Enums;
 using PR2.Shared.Interfaces;
 
 namespace ChatService.Repositories.Repositories;
@@ -16,6 +17,7 @@ public sealed class ChatsRepository
 
     public ChatsRepository(DapperDbConnection connection) => _db = connection.CreateConnection();
 
+    #region Implementation
     public async Task<Chat> AddAsync(Chat entity, CancellationToken cancellationToken = default) {
         var transaction = await _db.BeginTransactionAsync();
 
@@ -60,11 +62,33 @@ public sealed class ChatsRepository
     public async Task<List<Chat>> ListAsync(CancellationToken cancellationToken = default)
         => (await _db.QueryAsync<Chat>(ChatsQueries.List)).ToList();
 
-
     public Task UpdateAsync(Chat entity, CancellationToken cancellationToken = default)
         => throw new InvalidOperationException("Chats are immutable");
+    #endregion
 
+    public async Task<int> AddMemberAsync(string chatId, string userId, MemberRoleTypes role, CancellationToken cancellationToken = default) {
+        var chat = await GetByIdAsync(chatId, cancellationToken);
 
+        if (chat is null) {
+            return 0;
+        }
+
+        var member = new Member(chatId, userId, role);
+        return await _db.QueryFirstAsync<int>(MembersQueries.Add, member);
+    }
+
+    public async Task<int> DeleteMemberAsync(string chatId, string userId, CancellationToken cancellationToken = default) {
+        var chat = await GetByIdAsync(chatId, cancellationToken);
+
+        if (chat is null) {
+            return 0;
+        }
+
+        var member = new Member(chatId, userId);
+        return await _db.QueryFirstAsync<int>(MembersQueries.Delete, member);
+    }
+
+    #region NotImplemented
     public Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         => throw new NotImplementedException("This method is not implemented currently for 'Dapper'");
 
@@ -79,6 +103,7 @@ public sealed class ChatsRepository
 
     public Task DeleteRangeAsync(IEnumerable<Chat> entities, CancellationToken cancellationToken = default)
         => throw new NotImplementedException("This method is not implemented currently for 'Dapper'");
+    #endregion
 
     public void Dispose() => _db.Dispose();
 }

@@ -20,7 +20,7 @@ public sealed class ChatsRepository
     #region Implementation
     public async Task<Chat> AddAsync(Chat entity, CancellationToken cancellationToken = default) {
         await _db.OpenAsync(cancellationToken);
-        using var transaction = await _db.BeginTransactionAsync(cancellationToken);
+        using var transaction = await _db.BeginTransactionAsync();
 
         try {
             await _db.QueryAsync(ChatsQueries.Add, entity, transaction);

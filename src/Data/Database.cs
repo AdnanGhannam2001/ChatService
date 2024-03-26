@@ -36,6 +36,14 @@ public static class Database {
                 FOREIGN KEY ("ChatId") REFERENCES "Chats"("Id")
             );
         """);
+
+        await db.ExecuteAsync("""
+            CREATE TABLE IF NOT EXISTS "Friendships" (
+                "UserId" VARCHAR(255) NOT NULL,
+                "FriendId" VARCHAR(255) NOT NULL,
+                PRIMARY KEY ("UserId", FriendId)
+            );
+        """);
     }
 
     public async static Task SeedAsync(DapperDbConnection connection) { }

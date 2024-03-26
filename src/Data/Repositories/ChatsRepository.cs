@@ -1,3 +1,4 @@
+using System.Data;
 using System.Linq.Expressions;
 using ChatService.Data;
 using ChatService.Data.Sql;
@@ -19,7 +20,8 @@ public sealed class ChatsRepository
 
     #region Implementation
     public async Task<Chat> AddAsync(Chat entity, CancellationToken cancellationToken = default) {
-        await _db.OpenAsync(cancellationToken);
+        if (_db.FullState == ConnectionState.Closed) await _db.OpenAsync(cancellationToken);
+
         using var transaction = await _db.BeginTransactionAsync();
 
         try {
@@ -35,6 +37,7 @@ public sealed class ChatsRepository
         }
         catch (Exception) {
             await transaction.RollbackAsync();
+            throw;
         }
 
         return entity;

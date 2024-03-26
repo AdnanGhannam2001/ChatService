@@ -41,7 +41,7 @@ public static class Database {
             CREATE TABLE IF NOT EXISTS "Friendships" (
                 "UserId" VARCHAR(255) NOT NULL,
                 "FriendId" VARCHAR(255) NOT NULL,
-                PRIMARY KEY ("UserId", FriendId)
+                PRIMARY KEY ("UserId", "FriendId")
             );
         """);
     }

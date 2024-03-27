@@ -10,6 +10,7 @@ public static class Database {
             CREATE TABLE IF NOT EXISTS "Chats" (
                 "Id" VARCHAR(255) NOT NULL,
                 "IsGroup" BOOLEAN DEFAULT FALSE,
+                "IsActive" BOOLEAN DEFAULT TRUE,
                 PRIMARY KEY ("Id")
             );
         """);
@@ -34,14 +35,6 @@ public static class Database {
                 "LastUpdateAt" DATE,
                 PRIMARY KEY ("Id"),
                 FOREIGN KEY ("ChatId") REFERENCES "Chats"("Id")
-            );
-        """);
-
-        await db.ExecuteAsync("""
-            CREATE TABLE IF NOT EXISTS "Friendships" (
-                "UserId" VARCHAR(255) NOT NULL,
-                "FriendId" VARCHAR(255) NOT NULL,
-                PRIMARY KEY ("UserId", "FriendId")
             );
         """);
     }

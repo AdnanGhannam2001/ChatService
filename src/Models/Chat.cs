@@ -8,6 +8,7 @@ public sealed class Chat {
     public Chat(string user1Id, string user2Id) {
         Id = $"{user1Id}_{user2Id}";
         IsGroup = false;
+        IsActive = true;
         Messages = [];
         Members = null;
     }
@@ -15,12 +16,14 @@ public sealed class Chat {
     public Chat(string groupId, IEnumerable<Member> members) {
         Id = groupId;
         IsGroup = true;
+        IsActive = true;
         Members = members.ToList();
         Messages = [];
     }
 
     public string Id { get; init; }
     public bool IsGroup { get; private set; }
+    public bool IsActive { get; private set; }
     public ICollection<Message> Messages { get; private set; }
     public ICollection<Member>? Members { get; private set; }
 }

@@ -49,6 +49,7 @@ public sealed class ChatsRepository
     public async Task<int> CountAsync(CancellationToken cancellationToken = default) 
         => await _db.QueryFirstAsync<int>(ChatsQueries.Count);
 
+    // Soft Delete
     public async Task<bool> DeleteAsync(Chat entity, CancellationToken cancellationToken = default) 
         => await _db.QueryFirstAsync<int>(ChatsQueries.Delete, new { entity.Id }) > 0;
 

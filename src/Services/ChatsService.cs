@@ -6,6 +6,7 @@ using Dapper;
 using Npgsql;
 using PR2.Shared.Common;
 using PR2.Shared.Enums;
+using PR2.Shared.Exceptions;
 
 namespace ChatService.Services;
 
@@ -35,8 +36,7 @@ public sealed class ChatsService {
         }
         catch (Exception) {
             await transaction.RollbackAsync();
-            // Logger
-            return new ExceptionBase();
+            return new TransactionFailureException("Failed to create group chat");
         }
 
         return chat;
@@ -45,22 +45,22 @@ public sealed class ChatsService {
     public async Task<Result<Chat, ExceptionBase>> AddChatAsync(string user1Id, string user2Id, CancellationToken cancellationToken = default) {
         var chat = new Chat(user1Id, user2Id);
 
-        if (!cancellationToken.IsCancellationRequested) {
-            if (await _db.QueryAsync<string?>(ChatsQueries.Add, chat) is null) {
-                return new ExceptionBase();
-            }
-
-            return chat;
+        if (cancellationToken.IsCancellationRequested) {
+            return new OperationCancelledException("Operation just got cancelled");
         }
 
-        return new ExceptionBase();
+        if (await _db.QueryAsync<string?>(ChatsQueries.Add, chat) is null) {
+            return new DuplicatedRecordException("Chat already exists");
+        }
+
+        return chat;
     }
 
     public async Task<Result<int, ExceptionBase>> DeleteChatAsync(string id, CancellationToken cancellationToken = default) {
         var chat = await _db.QueryFirstOrDefaultAsync<Chat?>(ChatsQueries.GetById, new { Id = id });
 
         if (chat is null) {
-            return new ExceptionBase();
+            return new RecordNotFoundException($"Chat with Id: {id} is not found");
         }
         
         var affected = await _db.QueryFirstAsync<int>(ChatsQueries.SoftDelete, new { Id = id });
@@ -76,11 +76,11 @@ public sealed class ChatsService {
         var chat = await _db.QueryFirstOrDefaultAsync<Chat?>(ChatsQueries.GetById, new { Id = chatId });
 
         if (chat is null) {
-            return new ExceptionBase();
+            return new RecordNotFoundException($"Chat with Id: {chatId} is not found");
         }
 
         if (cancellationToken.IsCancellationRequested) {
-            return new ExceptionBase();
+            return new OperationCancelledException("Operation just got cancelled");
         }
         
         var member = new Member(chatId, memberId, role);
@@ -89,7 +89,7 @@ public sealed class ChatsService {
             await _db.QueryAsync(MembersQueries.Add, member);
         }
         catch (Exception) {
-            return new ExceptionBase();
+            return new DuplicatedRecordException("Member already exists in chat");
         }
 
         return member;
@@ -102,11 +102,11 @@ public sealed class ChatsService {
         var chat = await _db.QueryFirstOrDefaultAsync<Chat?>(ChatsQueries.GetById, new { Id = chatId });
 
         if (chat is null) {
-            return new ExceptionBase();
+            return new RecordNotFoundException($"Chat with Id: {chatId} is not found");
         }
 
         if (cancellationToken.IsCancellationRequested) {
-            return new ExceptionBase();
+            return new OperationCancelledException("Operation just got cancelled");
         }
         
         var affected = await _db.QueryFirstAsync<int>(MembersQueries.Delete, new { ChatId = chatId, MemberId = memberId });
@@ -122,11 +122,11 @@ public sealed class ChatsService {
         var chat = await _db.QueryFirstOrDefaultAsync<Chat?>(ChatsQueries.GetById, new { Id = chatId });
 
         if (chat is null) {
-            return new ExceptionBase();
+            return new RecordNotFoundException($"Chat with Id: {chatId} is not found");
         }
 
         if (cancellationToken.IsCancellationRequested) {
-            return new ExceptionBase();
+            return new OperationCancelledException("Operation just got cancelled");
         }
         
         var affected = await _db.QueryFirstAsync<int>(MembersQueries.ChangeRole, new {

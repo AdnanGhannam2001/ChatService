@@ -1,41 +1,49 @@
 namespace ChatService.Data.Sql;
 
 public static class ChatsQueries {
-    private const string _table = "Chats";
+    private const string _table = "\"Chats\"";
     public const string Add = $"""
-        INSERT INTO "{_table}" ("Id", "IsGroup")
+        INSERT INTO {_table} ("Id", "IsGroup")
         VALUES (@Id, @IsGroup)
         RETURNING "Id";
     """;
 
     public const string Count = $"""
         SELECT COUNT(*)
-        FROM "{_table}";
+        FROM {_table};
     """;
 
     public const string GetById = $"""
         SELECT *
-        FROM "{_table}"
+        FROM {_table}
         WHERE "Id" = @Id;
     """;
 
     public const string GetPage = $"""
         SELECT *
-        FROM "{_table}"
+        FROM {_table}
         LIMIT @PageSize
         OFFSET @PageNumber;
     """;
 
     public const string List = $"""
         SELECT *
-        FROM "{_table}"
+        FROM {_table}
         LIMIT @PageSize
         OFFSET @PageNumber;
     """;
 
+    // TODO
     public const string Update = $"""
         UPDATE {_table}
         SET 
+        WHERE "Id" = @Id
+        RETURNING "_computed";
+    """;
+
+    public const string SoftDelete = $"""
+        UPDATE {_table}
+        SET "IsActive" = FALSE
         WHERE "Id" = @Id
         RETURNING "_computed";
     """;

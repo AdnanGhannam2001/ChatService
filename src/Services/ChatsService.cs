@@ -2,7 +2,6 @@ using System.Data;
 using ChatService.Data;
 using ChatService.Data.Sql;
 using ChatService.Models;
-using ChatService.Repositories.Repositories;
 using Dapper;
 using Npgsql;
 using PR2.Shared.Common;
@@ -55,5 +54,87 @@ public sealed class ChatsService {
         }
 
         return new ExceptionBase();
+    }
+
+    public async Task<Result<int, ExceptionBase>> DeleteChatAsync(string id, CancellationToken cancellationToken = default) {
+        var chat = await _db.QueryFirstOrDefaultAsync<Chat?>(ChatsQueries.GetById, new { Id = id });
+
+        if (chat is null) {
+            return new ExceptionBase();
+        }
+        
+        var affected = await _db.QueryFirstAsync<int>(ChatsQueries.SoftDelete, new { Id = id });
+
+        return affected;
+    }
+
+    public async Task<Result<Member, ExceptionBase>> AddMemberAsync(string chatId,
+        string memberId,
+        MemberRoleTypes role,
+        CancellationToken cancellationToken = default)
+    {
+        var chat = await _db.QueryFirstOrDefaultAsync<Chat?>(ChatsQueries.GetById, new { Id = chatId });
+
+        if (chat is null) {
+            return new ExceptionBase();
+        }
+
+        if (cancellationToken.IsCancellationRequested) {
+            return new ExceptionBase();
+        }
+        
+        var member = new Member(chatId, memberId, role);
+
+        try {
+            await _db.QueryAsync(MembersQueries.Add, member);
+        }
+        catch (Exception) {
+            return new ExceptionBase();
+        }
+
+        return member;
+    }
+
+    public async Task<Result<int, ExceptionBase>> DeleteMemberAsync(string chatId,
+        string memberId,
+        CancellationToken cancellationToken = default)
+    {
+        var chat = await _db.QueryFirstOrDefaultAsync<Chat?>(ChatsQueries.GetById, new { Id = chatId });
+
+        if (chat is null) {
+            return new ExceptionBase();
+        }
+
+        if (cancellationToken.IsCancellationRequested) {
+            return new ExceptionBase();
+        }
+        
+        var affected = await _db.QueryFirstAsync<int>(MembersQueries.Delete, new { ChatId = chatId, MemberId = memberId });
+
+        return affected;
+    }
+
+    public async Task<Result<int, ExceptionBase>> ChangeMemberRoleAsync(string chatId,
+        string memberId,
+        MemberRoleTypes role,
+        CancellationToken cancellationToken = default)
+    {
+        var chat = await _db.QueryFirstOrDefaultAsync<Chat?>(ChatsQueries.GetById, new { Id = chatId });
+
+        if (chat is null) {
+            return new ExceptionBase();
+        }
+
+        if (cancellationToken.IsCancellationRequested) {
+            return new ExceptionBase();
+        }
+        
+        var affected = await _db.QueryFirstAsync<int>(MembersQueries.ChangeRole, new {
+            ChatId = chatId,
+            MemberId = memberId,
+            Role = role
+        });
+
+        return affected;
     }
 }

@@ -11,6 +11,7 @@ using PR2.Shared.Exceptions;
 namespace ChatService.Services;
 
 public sealed class ChatsService : IDisposable {
+    #region Fields & Constructor
     private readonly NpgsqlConnection _db;
     private readonly ILogger<ChatsService> _logger;
 
@@ -18,7 +19,9 @@ public sealed class ChatsService : IDisposable {
         _logger = logger;
         _db = connection.CreateConnection();
     }
+    #endregion
 
+    #region CRUD Operations
     #region CREATE
     public async Task<Result<Chat, ExceptionBase>> AddGroupChatAsync(string groupId, string creatorId, CancellationToken cancellationToken = default) {
         var creator = new Member(groupId, creatorId, MemberRoleTypes.Admin);
@@ -45,7 +48,6 @@ public sealed class ChatsService : IDisposable {
 
     public async Task<Result<Chat, ExceptionBase>> AddChatAsync(string user1Id, string user2Id, CancellationToken cancellationToken = default) {
         var chat = new Chat(user1Id, user2Id);
-
         if (cancellationToken.IsCancellationRequested) {
             return new OperationCancelledException("Operation just got cancelled");
         }
@@ -87,6 +89,14 @@ public sealed class ChatsService : IDisposable {
     #endregion
 
     #region READ
+    public async Task<Page<Chat>> GetChatsPage(int pageNumber, int pageSize, bool desc = false, CancellationToken cancellationToken = default) {
+        var items = await _db.QueryAsync<Chat>(ChatsQueries.List,
+            new { PageSize = pageSize, PageNumber = pageNumber });
+
+        var total = await _db.QueryFirstAsync<int>(ChatsQueries.Count);
+
+        return new(items, total);
+    }
     #endregion
 
     #region UPDATE
@@ -147,6 +157,7 @@ public sealed class ChatsService : IDisposable {
         return affected;
     }
 
+    #endregion
     #endregion
 
     public void Dispose() => _db.Dispose();

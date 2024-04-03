@@ -1,10 +1,17 @@
 namespace ChatService.Data.Sql;
 
-public static class ChatsQueries {
-    private const string _table = "\"Chats\"";
+public static class MessagesQueries {
+    private const string _table = "\"Messages\"";
+
+    public const string GetById = $"""
+        SELECT *
+        FROM {_table}
+        WHERE "Id" = @Id;
+    """;
+
     public const string Add = $"""
-        INSERT INTO {_table} ("Id", "IsGroup")
-        VALUES (@Id, @IsGroup)
+        INSERT INTO {_table} ("ChatId", "SenderId", "Content")
+        VALUES (@ChatId, @SenderId, @Content)
         RETURNING "Id";
     """;
 
@@ -13,31 +20,16 @@ public static class ChatsQueries {
         FROM {_table};
     """;
 
-    public const string GetById = $"""
-        SELECT *
-        FROM {_table}
-        WHERE "Id" = @Id;
-    """;
-
-    // TODO: Add 'LastMessageAt' to Table & Order by That Column
     public const string List = $"""
         SELECT *
         FROM {_table}
         LIMIT @PageSize
-        OFFSET @PageNumber;
+        OFFSET @PageNumber
     """;
 
-    // TODO
     public const string Update = $"""
         UPDATE {_table}
-        SET 
-        WHERE "Id" = @Id
-        RETURNING "_computed";
-    """;
-
-    public const string SoftDelete = $"""
-        UPDATE {_table}
-        SET "IsActive" = FALSE
+        SET "Content" = @Content
         WHERE "Id" = @Id
         RETURNING "_computed";
     """;

@@ -89,7 +89,7 @@ public sealed class ChatsService : IDisposable {
     #endregion
 
     #region READ
-    public async Task<Page<Chat>> GetChatsPage(int pageNumber, int pageSize, bool desc = false, CancellationToken cancellationToken = default) {
+    public async Task<Page<Chat>> GetChatsPageAsync(int pageNumber, int pageSize, bool desc = false) {
         var items = await _db.QueryAsync<Chat>(ChatsQueries.List,
             new { PageSize = pageSize, PageNumber = pageNumber });
 

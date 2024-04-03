@@ -10,7 +10,7 @@ using PR2.Shared.Exceptions;
 
 namespace ChatService.Services;
 
-public sealed class ChatsService {
+public sealed class ChatsService : IDisposable {
     private readonly NpgsqlConnection _db;
     private readonly ILogger<ChatsService> _logger;
 
@@ -19,6 +19,7 @@ public sealed class ChatsService {
         _db = connection.CreateConnection();
     }
 
+    #region CREATE
     public async Task<Result<Chat, ExceptionBase>> AddGroupChatAsync(string groupId, string creatorId, CancellationToken cancellationToken = default) {
         var creator = new Member(groupId, creatorId, MemberRoleTypes.Admin);
         var chat = new Chat(groupId, [creator]);
@@ -56,18 +57,6 @@ public sealed class ChatsService {
         return chat;
     }
 
-    public async Task<Result<int, ExceptionBase>> DeleteChatAsync(string id, CancellationToken cancellationToken = default) {
-        var chat = await _db.QueryFirstOrDefaultAsync<Chat?>(ChatsQueries.GetById, new { Id = id });
-
-        if (chat is null) {
-            return new RecordNotFoundException($"Chat with Id: {id} is not found");
-        }
-        
-        var affected = await _db.QueryFirstAsync<int>(ChatsQueries.SoftDelete, new { Id = id });
-
-        return affected;
-    }
-
     public async Task<Result<Member, ExceptionBase>> AddMemberAsync(string chatId,
         string memberId,
         MemberRoleTypes role,
@@ -95,25 +84,12 @@ public sealed class ChatsService {
         return member;
     }
 
-    public async Task<Result<int, ExceptionBase>> DeleteMemberAsync(string chatId,
-        string memberId,
-        CancellationToken cancellationToken = default)
-    {
-        var chat = await _db.QueryFirstOrDefaultAsync<Chat?>(ChatsQueries.GetById, new { Id = chatId });
+    #endregion
 
-        if (chat is null) {
-            return new RecordNotFoundException($"Chat with Id: {chatId} is not found");
-        }
+    #region READ
+    #endregion
 
-        if (cancellationToken.IsCancellationRequested) {
-            return new OperationCancelledException("Operation just got cancelled");
-        }
-        
-        var affected = await _db.QueryFirstAsync<int>(MembersQueries.Delete, new { ChatId = chatId, MemberId = memberId });
-
-        return affected;
-    }
-
+    #region UPDATE
     public async Task<Result<int, ExceptionBase>> ChangeMemberRoleAsync(string chatId,
         string memberId,
         MemberRoleTypes role,
@@ -137,4 +113,41 @@ public sealed class ChatsService {
 
         return affected;
     }
+    #endregion
+    
+    #region DELETE
+    public async Task<Result<int, ExceptionBase>> DeleteChatAsync(string id, CancellationToken cancellationToken = default) {
+        var chat = await _db.QueryFirstOrDefaultAsync<Chat?>(ChatsQueries.GetById, new { Id = id });
+
+        if (chat is null) {
+            return new RecordNotFoundException($"Chat with Id: {id} is not found");
+        }
+        
+        var affected = await _db.QueryFirstAsync<int>(ChatsQueries.SoftDelete, new { Id = id });
+
+        return affected;
+    }
+
+    public async Task<Result<int, ExceptionBase>> DeleteMemberAsync(string chatId,
+        string memberId,
+        CancellationToken cancellationToken = default)
+    {
+        var chat = await _db.QueryFirstOrDefaultAsync<Chat?>(ChatsQueries.GetById, new { Id = chatId });
+
+        if (chat is null) {
+            return new RecordNotFoundException($"Chat with Id: {chatId} is not found");
+        }
+
+        if (cancellationToken.IsCancellationRequested) {
+            return new OperationCancelledException("Operation just got cancelled");
+        }
+        
+        var affected = await _db.QueryFirstAsync<int>(MembersQueries.Delete, new { ChatId = chatId, MemberId = memberId });
+
+        return affected;
+    }
+
+    #endregion
+
+    public void Dispose() => _db.Dispose();
 }

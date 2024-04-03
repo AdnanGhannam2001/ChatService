@@ -26,6 +26,7 @@ public static class ChatsQueries {
         OFFSET @PageNumber;
     """;
 
+    // TODO: Add 'LastMessageAt' to Table & Order by That Column
     public const string List = $"""
         SELECT *
         FROM {_table}

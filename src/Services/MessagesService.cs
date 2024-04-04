@@ -22,7 +22,7 @@ public sealed class MessagesService : IDisposable
 
     #region CRUD Operations
     #region CREATE
-    public async Task<Result<Message, ExceptionBase>> SendMessageAsync(Message message, CancellationToken cancellationToken = default) {
+    public async Task<Result<Message>> SendMessageAsync(Message message, CancellationToken cancellationToken = default) {
         if (cancellationToken.IsCancellationRequested) {
             return new OperationCancelledException("Operation just got cancelled");
         }
@@ -46,7 +46,7 @@ public sealed class MessagesService : IDisposable
     #endregion
 
     #region UPDATE
-    public async Task<Result<int, ExceptionBase>> UpdateMessageAsync(string id, string content, CancellationToken cancellationToken = default) {
+    public async Task<Result<int>> UpdateMessageAsync(string id, string content, CancellationToken cancellationToken = default) {
         var message = await _db.QueryFirstOrDefaultAsync(MessagesQueries.GetById,
             new { Id = id });
 
@@ -66,7 +66,7 @@ public sealed class MessagesService : IDisposable
     #endregion
 
     #region DELETE
-    public async Task<Result<int, ExceptionBase>> DeleteMessageAsync(string id, CancellationToken cancellationToken = default) {
+    public async Task<Result<int>> DeleteMessageAsync(string id, CancellationToken cancellationToken = default) {
         var message = await _db.QueryFirstOrDefaultAsync(MessagesQueries.GetById,
             new { Id = id });
 

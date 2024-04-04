@@ -23,7 +23,7 @@ public sealed class ChatsService : IDisposable {
 
     #region CRUD Operations
     #region CREATE
-    public async Task<Result<Chat, ExceptionBase>> AddGroupChatAsync(string groupId, string creatorId, CancellationToken cancellationToken = default) {
+    public async Task<Result<Chat>> AddGroupChatAsync(string groupId, string creatorId, CancellationToken cancellationToken = default) {
         var creator = new Member(groupId, creatorId, MemberRoleTypes.Admin);
         var chat = new Chat(groupId, [creator]);
 
@@ -46,7 +46,7 @@ public sealed class ChatsService : IDisposable {
         return chat;
     }
 
-    public async Task<Result<Chat, ExceptionBase>> AddChatAsync(string user1Id, string user2Id, CancellationToken cancellationToken = default) {
+    public async Task<Result<Chat>> AddChatAsync(string user1Id, string user2Id, CancellationToken cancellationToken = default) {
         var chat = new Chat(user1Id, user2Id);
         if (cancellationToken.IsCancellationRequested) {
             return new OperationCancelledException("Operation just got cancelled");
@@ -59,7 +59,7 @@ public sealed class ChatsService : IDisposable {
         return chat;
     }
 
-    public async Task<Result<Member, ExceptionBase>> AddMemberAsync(string chatId,
+    public async Task<Result<Member>> AddMemberAsync(string chatId,
         string memberId,
         MemberRoleTypes role,
         CancellationToken cancellationToken = default)
@@ -100,7 +100,7 @@ public sealed class ChatsService : IDisposable {
     #endregion
 
     #region UPDATE
-    public async Task<Result<int, ExceptionBase>> ChangeMemberRoleAsync(string chatId,
+    public async Task<Result<int>> ChangeMemberRoleAsync(string chatId,
         string memberId,
         MemberRoleTypes role,
         CancellationToken cancellationToken = default)
@@ -126,7 +126,7 @@ public sealed class ChatsService : IDisposable {
     #endregion
     
     #region DELETE
-    public async Task<Result<int, ExceptionBase>> DeleteChatAsync(string id, CancellationToken cancellationToken = default) {
+    public async Task<Result<int>> DeleteChatAsync(string id, CancellationToken cancellationToken = default) {
         var chat = await _db.QueryFirstOrDefaultAsync<Chat?>(ChatsQueries.GetById, new { Id = id });
 
         if (chat is null) {
@@ -138,7 +138,7 @@ public sealed class ChatsService : IDisposable {
         return affected;
     }
 
-    public async Task<Result<int, ExceptionBase>> DeleteMemberAsync(string chatId,
+    public async Task<Result<int>> DeleteMemberAsync(string chatId,
         string memberId,
         CancellationToken cancellationToken = default)
     {
@@ -151,7 +151,6 @@ public sealed class ChatsService : IDisposable {
         if (cancellationToken.IsCancellationRequested) {
             return new OperationCancelledException("Operation just got cancelled");
         }
-        
         var affected = await _db.QueryFirstAsync<int>(MembersQueries.Delete, new { ChatId = chatId, MemberId = memberId });
 
         return affected;

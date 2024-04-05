@@ -11,6 +11,7 @@ public static class Database {
                 "Id" VARCHAR(255) NOT NULL,
                 "IsGroup" BOOLEAN DEFAULT FALSE,
                 "IsActive" BOOLEAN DEFAULT TRUE,
+                "LastMessageAt" DATE,
                 PRIMARY KEY ("Id")
             );
         """);

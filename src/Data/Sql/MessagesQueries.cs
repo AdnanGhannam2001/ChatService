@@ -24,7 +24,7 @@ public static class MessagesQueries {
         SELECT *
         FROM {_table}
         LIMIT @PageSize
-        OFFSET @PageNumber
+        OFFSET @PageNumber;
     """;
 
     public const string Update = $"""

@@ -2,6 +2,7 @@ namespace ChatService.Data.Sql;
 
 public static class ChatsQueries {
     private const string _table = "\"Chats\"";
+
     public const string Add = $"""
         INSERT INTO {_table} ("Id", "IsGroup")
         VALUES (@Id, @IsGroup)
@@ -22,6 +23,8 @@ public static class ChatsQueries {
     public const string ListAsc = $"""
         SELECT *
         FROM {_table}
+        JOIN "Members" ON {_table}."Id" = "Members"."ChatId"
+        WHERE "Members"."UserId" = @UserId
         ORDER BY "LastMessageAt" ASC
         LIMIT @PageSize
         OFFSET @PageNumber;
@@ -30,17 +33,11 @@ public static class ChatsQueries {
     public const string ListDesc = $"""
         SELECT *
         FROM {_table}
+        JOIN "Members" ON {_table}."Id" = "Members"."ChatId"
+        WHERE "Members"."UserId" = @UserId
         ORDER BY "LastMessageAt" DESC
         LIMIT @PageSize
         OFFSET @PageNumber;
-    """;
-
-    // TODO
-    public const string Update = $"""
-        UPDATE {_table}
-        SET 
-        WHERE "Id" = @Id
-        RETURNING "_computed";
     """;
 
     public const string NewMessage = $"""

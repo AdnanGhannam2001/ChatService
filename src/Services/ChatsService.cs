@@ -117,9 +117,9 @@ public sealed class ChatsService : IDisposable {
     #endregion
 
     #region READ
-    public async Task<Page<Chat>> GetChatsPageAsync(int pageNumber, int pageSize, bool desc = false) {
+    public async Task<Page<Chat>> GetChatsPageAsync(string userId, int pageNumber, int pageSize, bool desc = false) {
         var items = await _db.QueryAsync<Chat>(desc ? ChatsQueries.ListDesc : ChatsQueries.ListAsc,
-            new { PageSize = pageSize, PageNumber = pageNumber });
+            new { PageSize = pageSize, PageNumber = pageNumber, UserId = userId });
 
         var total = await _db.QueryFirstAsync<int>(ChatsQueries.Count);
 

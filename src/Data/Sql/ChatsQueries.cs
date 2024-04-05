@@ -19,11 +19,18 @@ public static class ChatsQueries {
         WHERE "Id" = @Id;
     """;
 
-    // TODO: Add 'LastMessageAt' to Table & Order by That Column
-    public const string List = $"""
+    public const string ListAsc = $"""
         SELECT *
         FROM {_table}
-        ORDER BY "LastMessageAt" @Ordering
+        ORDER BY "LastMessageAt" ASC
+        LIMIT @PageSize
+        OFFSET @PageNumber;
+    """;
+
+    public const string ListDesc = $"""
+        SELECT *
+        FROM {_table}
+        ORDER BY "LastMessageAt" DESC
         LIMIT @PageSize
         OFFSET @PageNumber;
     """;

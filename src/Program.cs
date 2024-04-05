@@ -1,6 +1,8 @@
 using System.Security.Claims;
 using ChatService.Consumers;
 using ChatService.Data;
+using ChatService.Endpoints;
+using ChatService.Services;
 using MassTransit;
 using MassTransit.Configuration;
 using Microsoft.AspNetCore.Authentication;
@@ -25,6 +27,7 @@ builder.Services.AddMassTransit(config => {
 });
 
 builder.Services.AddScoped<DapperDbConnection>();
+builder.Services.AddScoped<ChatsService>();
 
 var app = builder.Build();
 

@@ -20,11 +20,18 @@ public static class MessagesQueries {
         FROM {_table};
     """;
 
-    // TODO Test this (@Ordering)
-    public const string List = $"""
+    public const string ListAsc = $"""
         SELECT *
         FROM {_table}
-        ORDER BY "SentAt" @Ordering
+        ORDER BY "SentAt" ASC
+        LIMIT @PageSize
+        OFFSET @PageNumber;
+    """;
+
+    public const string ListDesc = $"""
+        SELECT *
+        FROM {_table}
+        ORDER BY "SentAt" DESC
         LIMIT @PageSize
         OFFSET @PageNumber;
     """;

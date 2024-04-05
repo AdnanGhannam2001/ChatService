@@ -118,12 +118,8 @@ public sealed class ChatsService : IDisposable {
 
     #region READ
     public async Task<Page<Chat>> GetChatsPageAsync(int pageNumber, int pageSize, bool desc = false) {
-        var items = await _db.QueryAsync<Chat>(ChatsQueries.List,
-            new {
-                PageSize = pageSize,
-                PageNumber = pageNumber,
-                Ordering = desc ? "DESC" : "ASC"
-            });
+        var items = await _db.QueryAsync<Chat>(desc ? ChatsQueries.ListDesc : ChatsQueries.ListAsc,
+            new { PageSize = pageSize, PageNumber = pageNumber });
 
         var total = await _db.QueryFirstAsync<int>(ChatsQueries.Count);
 
@@ -156,12 +152,8 @@ public sealed class ChatsService : IDisposable {
             return chatResult.Exceptions;
         }
 
-        var items = await _db.QueryAsync<Message>(MessagesQueries.List,
-            new {
-                PageNumber = pageNumber,
-                PageSize = pageSize,
-                Ordering = desc ? "DESC" : "ASC"
-            });
+        var items = await _db.QueryAsync<Message>(desc ? MessagesQueries.ListDesc : MessagesQueries.ListAsc,
+            new { PageNumber = pageNumber, PageSize = pageSize });
 
         var total = await _db.QueryFirstAsync<int>(MessagesQueries.Count);
 

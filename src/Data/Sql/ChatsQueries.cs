@@ -23,6 +23,7 @@ public static class ChatsQueries {
     public const string List = $"""
         SELECT *
         FROM {_table}
+        ORDER BY "LastMessageAt" @Ordering
         LIMIT @PageSize
         OFFSET @PageNumber;
     """;
@@ -31,6 +32,13 @@ public static class ChatsQueries {
     public const string Update = $"""
         UPDATE {_table}
         SET 
+        WHERE "Id" = @Id
+        RETURNING "_computed";
+    """;
+
+    public const string NewMessage = $"""
+        UPDATE {_table}
+        SET "LastMessageAt" = @LastMessageAt
         WHERE "Id" = @Id
         RETURNING "_computed";
     """;

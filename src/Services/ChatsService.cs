@@ -97,8 +97,20 @@ public sealed class ChatsService : IDisposable {
             return chatResult.Exceptions;
         }
 
-        // TODO: Handle Failure
-        await _db.QueryFirstAsync<string>(MessagesQueries.Add, message);
+        using var transaction = _db.BeginTransaction();
+        try
+        {
+            await _db.QueryFirstAsync<string>(MessagesQueries.Add, message, transaction);
+            await _db.QueryFirstAsync<int>(ChatsQueries.NewMessage, new {
+                    Id = message.ChatId,
+                    LastMessageAt = DateTime.UtcNow,
+                }, transaction);
+            await transaction.CommitAsync(cancellationToken);
+        }
+        catch (Exception) {
+            await transaction.RollbackAsync();
+            return new TransactionFailureException("Failed to send a message to chat");
+        }
 
         return message;
     }
@@ -107,7 +119,11 @@ public sealed class ChatsService : IDisposable {
     #region READ
     public async Task<Page<Chat>> GetChatsPageAsync(int pageNumber, int pageSize, bool desc = false) {
         var items = await _db.QueryAsync<Chat>(ChatsQueries.List,
-            new { PageSize = pageSize, PageNumber = pageNumber });
+            new {
+                PageSize = pageSize,
+                PageNumber = pageNumber,
+                Ordering = desc ? "DESC" : "ASC"
+            });
 
         var total = await _db.QueryFirstAsync<int>(ChatsQueries.Count);
 
@@ -141,7 +157,11 @@ public sealed class ChatsService : IDisposable {
         }
 
         var items = await _db.QueryAsync<Message>(MessagesQueries.List,
-            new { PageNumber = pageNumber, PageSize = pageSize });
+            new {
+                PageNumber = pageNumber,
+                PageSize = pageSize,
+                Ordering = desc ? "DESC" : "ASC"
+            });
 
         var total = await _db.QueryFirstAsync<int>(MessagesQueries.Count);
 
@@ -174,7 +194,11 @@ public sealed class ChatsService : IDisposable {
         return affected;
     }
 
-    public async Task<Result<int>> UpdateMessageAsync(string chatId, string messageId, string content, CancellationToken cancellationToken = default) {
+    public async Task<Result<int>> UpdateMessageAsync(string chatId,
+        string messageId,
+        string content,
+        CancellationToken cancellationToken = default)
+    {
         var chatResult = await GetChatByIdAsync(chatId, cancellationToken);
 
         if (!chatResult.IsSuccess) {
@@ -192,10 +216,23 @@ public sealed class ChatsService : IDisposable {
             return new OperationCancelledException("Operation just got cancelled");
         }
 
-        var affected = await _db.QueryFirstAsync<int>(MessagesQueries.Update,
-            new { Id = messageId, Content = content });
+        using var transaction = _db.BeginTransaction();
 
-        return affected;
+        try {
+            var affected = await _db.QueryFirstAsync<int>(MessagesQueries.Update,
+                new { Id = messageId, Content = content });
+            await _db.QueryFirstAsync<int>(ChatsQueries.NewMessage, new {
+                    Id = message.ChatId,
+                    LastMessageAt = DateTime.UtcNow,
+                }, transaction);
+            await transaction.CommitAsync(cancellationToken);
+            
+            return affected;
+        }
+        catch (Exception) {
+            await transaction.RollbackAsync();
+            return new TransactionFailureException("Failed to send a message to chat");
+        }
     }
     #endregion
     

@@ -1,22 +1,25 @@
-using ChatService.Models;
+using ChatService.Interfaces;
 using MassTransit;
 using PR2.Contracts.Events;
-using PR2.Shared.Enums;
 
 namespace ChatService.Consumers;
 
-public sealed class GroupCreatedEventConsumer : IConsumer<GroupCreatedEvent> {
+internal sealed class GroupCreatedEventConsumer : IConsumer<GroupCreatedEvent> {
+    private readonly IChatsService _service;
     private readonly ILogger<GroupCreatedEventConsumer> _logger;
 
-    public GroupCreatedEventConsumer(ILogger<GroupCreatedEventConsumer> logger) {
+    public GroupCreatedEventConsumer(IChatsService service, ILogger<GroupCreatedEventConsumer> logger) {
+        _service = service;
         _logger = logger;
     }
 
     public async Task Consume(ConsumeContext<GroupCreatedEvent> context) {
-        _logger.LogInformation("Received: {Message}", context.Message);
+        var result = await _service.AddGroupChatAsync(context.Message.GroupId, context.Message.CreatorId);
 
-        var creator = new Member(context.Message.GroupId, context.Message.CreatorId, MemberRoleTypes.Admin);
-        var chat = new Chat(context.Message.GroupId, [creator]);
-        // await _repo.AddAsync(chat);
+        if (!result.IsSuccess) {
+            _logger.LogCritical(
+                "Something went wrong while attempting to create a group with Id: {GroupId} and creator Id: {CreatorId}",
+                context.Message.GroupId, context.Message.CreatorId);
+        }
     }
 }

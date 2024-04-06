@@ -10,8 +10,8 @@ public static class MessagesQueries {
     """;
 
     public const string Add = $"""
-        INSERT INTO {_table} ("ChatId", "SenderId", "Content")
-        VALUES (@ChatId, @SenderId, @Content)
+        INSERT INTO {_table} ("Id", "ChatId", "SenderId", "Content")
+        VALUES (@Id, @ChatId, @SenderId, @Content)
         RETURNING "Id";
     """;
 
@@ -39,13 +39,11 @@ public static class MessagesQueries {
     public const string Update = $"""
         UPDATE {_table}
         SET "Content" = @Content
-        WHERE "Id" = @Id
-        RETURNING "_computed";
+        WHERE "Id" = @Id;
     """;
 
     public const string Delete = $"""
         DELETE FROM {_table}
-        WHERE "Id" = @Id
-        RETURNING "_computed";
+        WHERE "Id" = @Id;
     """;
 }

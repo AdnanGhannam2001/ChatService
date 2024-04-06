@@ -11,13 +11,11 @@ public static class MembersQueries {
     public const string ChangeRole = $"""
         UPDATE {_table}
         SET "Role" = @Role
-        WHERE "ChatId" = @ChatId AND "UserId" = @UserId
-        RETURNING "_computed";
+        WHERE "ChatId" = @ChatId AND "UserId" = @UserId;
     """;
 
     public const string Delete = $"""
         DELETE FROM {_table}
-        WHERE "ChatId" = @ChatId AND "UserId" = @UserId
-        RETURNING "_computed";
+        WHERE "ChatId" = @ChatId AND "UserId" = @UserId;
     """;
 }

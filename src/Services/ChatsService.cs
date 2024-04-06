@@ -97,11 +97,13 @@ public sealed class ChatsService : IDisposable {
             return chatResult.Exceptions;
         }
 
+        if (_db.FullState == ConnectionState.Closed) await _db.OpenAsync(cancellationToken);
+        
         using var transaction = _db.BeginTransaction();
         try
         {
             await _db.QueryFirstAsync<string>(MessagesQueries.Add, message, transaction);
-            await _db.QueryFirstAsync<int>(ChatsQueries.NewMessage, new {
+            await _db.QueryAsync(ChatsQueries.NewMessage, new {
                     Id = message.ChatId,
                     LastMessageAt = DateTime.UtcNow,
                 }, transaction);
@@ -177,13 +179,13 @@ public sealed class ChatsService : IDisposable {
             return new OperationCancelledException("Operation just got cancelled");
         }
         
-        var affected = await _db.QueryFirstAsync<int>(MembersQueries.ChangeRole, new {
+        await _db.QueryAsync<int>(MembersQueries.ChangeRole, new {
             ChatId = chatId,
-            MemberId = memberId,
+            UserId = memberId,
             Role = role
         });
 
-        return affected;
+        return 1;
     }
 
     public async Task<Result<int>> UpdateMessageAsync(string chatId,
@@ -208,21 +210,25 @@ public sealed class ChatsService : IDisposable {
             return new OperationCancelledException("Operation just got cancelled");
         }
 
+        if (_db.FullState == ConnectionState.Closed) await _db.OpenAsync(cancellationToken);
+        
         using var transaction = _db.BeginTransaction();
 
         try {
-            var affected = await _db.QueryFirstAsync<int>(MessagesQueries.Update,
+            await _db.QueryAsync(MessagesQueries.Update,
                 new { Id = messageId, Content = content });
-            await _db.QueryFirstAsync<int>(ChatsQueries.NewMessage, new {
+            await _db.QueryAsync(ChatsQueries.NewMessage, new {
                     Id = message.ChatId,
                     LastMessageAt = DateTime.UtcNow,
                 }, transaction);
+
             await transaction.CommitAsync(cancellationToken);
             
-            return affected;
+            return 1;
         }
-        catch (Exception) {
+        catch (Exception exp) {
             await transaction.RollbackAsync();
+            System.Console.WriteLine(exp.Message);
             return new TransactionFailureException("Failed to send a message to chat");
         }
     }
@@ -236,9 +242,9 @@ public sealed class ChatsService : IDisposable {
             return chatResult.Exceptions;
         }
         
-        var affected = await _db.QueryFirstAsync<int>(ChatsQueries.SoftDelete, new { Id = id });
+        await _db.QueryAsync(ChatsQueries.SoftDelete, new { Id = id });
 
-        return affected;
+        return 1;
     }
 
     public async Task<Result<int>> DeleteMemberAsync(string chatId,
@@ -254,9 +260,11 @@ public sealed class ChatsService : IDisposable {
         if (cancellationToken.IsCancellationRequested) {
             return new OperationCancelledException("Operation just got cancelled");
         }
-        var affected = await _db.QueryFirstAsync<int>(MembersQueries.Delete, new { ChatId = chatId, MemberId = memberId });
 
-        return affected;
+        await _db.QueryAsync(MembersQueries.Delete,
+            new { ChatId = chatId, UserId = memberId });
+
+        return 1;
     }
 
     public async Task<Result<int>> DeleteMessageAsync(string chatId, string messageId, CancellationToken cancellationToken = default) {
@@ -277,9 +285,9 @@ public sealed class ChatsService : IDisposable {
             return new OperationCancelledException("Operation just got cancelled");
         }
 
-        var affected = await _db.QueryFirstAsync<int>(MessagesQueries.Delete, new { Id = messageId });
+        await _db.QueryAsync(MessagesQueries.Delete, new { Id = messageId });
 
-        return affected;
+        return 1;
     }
     #endregion
     #endregion

@@ -20,6 +20,7 @@ public static class ChatsQueries {
         WHERE "Id" = @Id;
     """;
 
+    // TODO Get User Chats too (not only group chats)
     public const string ListAsc = $"""
         SELECT *
         FROM {_table}
@@ -43,15 +44,13 @@ public static class ChatsQueries {
     public const string NewMessage = $"""
         UPDATE {_table}
         SET "LastMessageAt" = @LastMessageAt
-        WHERE "Id" = @Id
-        RETURNING "_computed";
+        WHERE "Id" = @Id;
     """;
 
     public const string SoftDelete = $"""
         UPDATE {_table}
         SET "IsActive" = FALSE
-        WHERE "Id" = @Id
-        RETURNING "_computed";
+        WHERE "Id" = @Id;
     """;
 
     public const string Delete = $"""

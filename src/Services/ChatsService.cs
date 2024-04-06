@@ -1,6 +1,7 @@
 using System.Data;
 using ChatService.Data;
 using ChatService.Data.Sql;
+using ChatService.Interfaces;
 using ChatService.Models;
 using Dapper;
 using Npgsql;
@@ -10,7 +11,7 @@ using PR2.Shared.Exceptions;
 
 namespace ChatService.Services;
 
-public sealed class ChatsService : IDisposable {
+public sealed class ChatsService : IChatsService, IDisposable {
     #region Fields & Constructor
     private readonly NpgsqlConnection _db;
     private readonly ILogger<ChatsService> _logger;

@@ -2,6 +2,7 @@ using System.Security.Claims;
 using ChatService.Data;
 using ChatService.Endpoints;
 using ChatService.Extensions;
+using ChatService.Hubs;
 using Microsoft.AspNetCore.Authentication;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -9,6 +10,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services
     .AddEndpointsApiExplorer()
     .AddSwaggerGen()
+    .AddRealtimeConnection()
     .AddAuth()
     .AddRabbitMQ()
     .RegisterServices();
@@ -59,5 +61,11 @@ app.MapGet("/login/{id}", async (string id, HttpContext context) => {
 
     return Results.Ok("Logged In");
 });
+
+app.MapHub<ChatHub>("/websocket/chat");
+
+app.MapGroup("api/chats")
+    .MapChatEndpoints()
+    .RequireAuthorization();
 
 app.Run();

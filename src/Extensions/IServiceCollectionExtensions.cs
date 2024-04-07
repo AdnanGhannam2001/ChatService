@@ -24,6 +24,12 @@ internal static class IServiceCollectionExtensions {
         return services;
     }
 
+    public static IServiceCollection AddRealtimeConnection(this IServiceCollection services) {
+        services.AddSignalR();
+
+        return services;
+    }
+
     public static IServiceCollection AddRabbitMQ(this IServiceCollection services) {
         return services.AddMassTransit(config => {
             var assembly = Assembly.GetExecutingAssembly();

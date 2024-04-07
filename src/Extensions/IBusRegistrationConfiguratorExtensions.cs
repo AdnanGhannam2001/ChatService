@@ -2,10 +2,10 @@ using System.Reflection;
 using MassTransit;
 using MassTransit.Configuration;
 
-namespace ChatService.Configurations;
+namespace ChatService.Extensions;
 
-internal static class MassTransitConfigurations {
-    public static void RegisterConsumersFromAssembly(Assembly assembly, IBusRegistrationConfigurator config) {
+internal static class IBusRegistrationConfiguratorExtensions {
+    public static void RegisterConsumersFromAssembly(this IBusRegistrationConfigurator config, Assembly assembly) {
         var method = typeof(DependencyInjectionConsumerRegistrationExtensions)
             .GetMethods()
             .First(m => m.Name == nameof(DependencyInjectionConsumerRegistrationExtensions.RegisterConsumer));

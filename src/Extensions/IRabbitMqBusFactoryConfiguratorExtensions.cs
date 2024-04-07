@@ -1,14 +1,13 @@
 using System.Reflection;
 using ChatService.Attributes;
-using ChatService.Extensions;
 using MassTransit;
 
-namespace ChatService.Configurations;
+namespace ChatService.Extensions;
 
-internal static class RabbitMQConfigurations {
-    public static void ConfigurationReceiveEndpointsFromAssembly(Assembly assembly,
-        IBusRegistrationContext context,
-        IRabbitMqBusFactoryConfigurator config)
+internal static class IRabbitMqBusFactoryConfiguratorExtensions {
+    public static void ConfigurationReceiveEndpointsFromAssembly(this IRabbitMqBusFactoryConfigurator config,
+        Assembly assembly,
+        IBusRegistrationContext context)
     {
         foreach (var klass in GetAssemblyTypesWithAttribute<QueueConsumerAttribute>(assembly)) {
             var queueAttribute = klass.GetCustomAttribute<QueueConsumerAttribute>()!;

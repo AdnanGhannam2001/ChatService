@@ -1,3 +1,4 @@
+using ChatService.Attributes;
 using ChatService.Interfaces;
 using MassTransit;
 using PR2.Contracts.Events;
@@ -5,8 +6,8 @@ using PR2.Shared.Enums;
 
 namespace ChatService.Consumers;
 
-internal sealed class MemberJoinedEventConsumer : IConsumer<MemberJoinedEvent>
-{
+[QueueConsumer]
+internal sealed class MemberJoinedEventConsumer : IConsumer<MemberJoinedEvent> {
     private readonly IChatsService _service;
     private readonly ILogger<GroupCreatedEventConsumer> _logger;
 

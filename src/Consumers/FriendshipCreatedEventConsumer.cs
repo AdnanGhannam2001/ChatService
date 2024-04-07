@@ -1,11 +1,12 @@
+using ChatService.Attributes;
 using ChatService.Interfaces;
 using MassTransit;
 using PR2.Contracts.Events;
 
 namespace ChatService.Consumers;
 
-internal sealed class FriendshipCreatedEventConsumer : IConsumer<FriendshipCreatedEvent>
-{
+[QueueConsumer]
+internal sealed class FriendshipCreatedEventConsumer : IConsumer<FriendshipCreatedEvent> {
     private readonly IChatsService _service;
     private readonly ILogger<GroupCreatedEventConsumer> _logger;
 

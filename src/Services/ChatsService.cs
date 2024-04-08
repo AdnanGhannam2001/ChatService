@@ -143,6 +143,20 @@ public sealed class ChatsService : IChatsService, IDisposable {
         return chat;
     }
 
+    public async Task<Result<Member>> GetMemberAsync(string chatId, string memberId, CancellationToken cancellationToken = default) {
+        if (cancellationToken.IsCancellationRequested) {
+            return new OperationCancelledException("Operation just got cancelled");
+        }
+
+        var member = await _db.QueryFirstOrDefaultAsync<Member>(MembersQueries.Get, new { ChatId = chatId, UserId = memberId });
+
+        if (member is null) {
+            return new RecordNotFoundException($"Member is not found in chat with Id: {chatId}");
+        }
+
+        return member;
+    }
+
     public async Task<Result<Page<Message>>> GetMessagesPageAsync(string chatId,
         int pageNumber,
         int pageSize,
@@ -162,7 +176,23 @@ public sealed class ChatsService : IChatsService, IDisposable {
 
         return new Page<Message>(items, total);
     }
+    
+    public async Task<Result<Message>> GetMessageByIdAsync(string id, CancellationToken cancellationToken = default) {
+        if (cancellationToken.IsCancellationRequested) {
+            return new OperationCancelledException("Operation just got cancelled");
+        }
+
+        var message = await _db.QueryFirstOrDefaultAsync(MessagesQueries.GetById,
+            new { Id = id });
+
+        if (message is null) {
+            return new RecordNotFoundException("Message is not found");
+        }
+
+        return message;
+    }
     #endregion
+    
 
     #region UPDATE
     public async Task<Result<int>> ChangeMemberRoleAsync(string chatId,
@@ -200,11 +230,10 @@ public sealed class ChatsService : IChatsService, IDisposable {
             return chatResult.Exceptions;
         }
 
-        var message = await _db.QueryFirstOrDefaultAsync(MessagesQueries.GetById,
-            new { Id = messageId });
+        var messageResult = await GetMessageByIdAsync(messageId, cancellationToken);
 
-        if (message is null) {
-            return new RecordNotFoundException("Message is not found");
+        if (!messageResult.IsSuccess) {
+            return messageResult.Exceptions;
         }
 
         if (cancellationToken.IsCancellationRequested) {
@@ -219,7 +248,7 @@ public sealed class ChatsService : IChatsService, IDisposable {
             await _db.QueryAsync(MessagesQueries.Update,
                 new { Id = messageId, Content = content });
             await _db.QueryAsync(ChatsQueries.NewMessage, new {
-                    Id = message.ChatId,
+                    Id = messageResult.Value.ChatId,
                     LastMessageAt = DateTime.UtcNow,
                 }, transaction);
 
@@ -227,9 +256,8 @@ public sealed class ChatsService : IChatsService, IDisposable {
             
             return 1;
         }
-        catch (Exception exp) {
+        catch (Exception) {
             await transaction.RollbackAsync();
-            System.Console.WriteLine(exp.Message);
             return new TransactionFailureException("Failed to send a message to chat");
         }
     }
@@ -275,11 +303,10 @@ public sealed class ChatsService : IChatsService, IDisposable {
             return chatResult.Exceptions;
         }
 
-        var message = await _db.QueryFirstOrDefaultAsync(MessagesQueries.GetById,
-            new { Id = messageId });
+        var messageResult = await GetMessageByIdAsync(messageId, cancellationToken);
 
-        if (message is null) {
-            return new RecordNotFoundException("Message is not found");
+        if (!messageResult.IsSuccess) {
+            return messageResult.Exceptions;
         }
 
         if (cancellationToken.IsCancellationRequested) {
@@ -291,6 +318,10 @@ public sealed class ChatsService : IChatsService, IDisposable {
         return 1;
     }
     #endregion
+    #endregion
+
+    #region Static
+    public static bool HasMinimalRole(MemberRoleTypes memberRole, MemberRoleTypes minimalRole) => memberRole >= minimalRole;
     #endregion
 
     public void Dispose() => _db.Dispose();

@@ -4,13 +4,14 @@ using ChatService.Models;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using PR2.Shared.Common;
+using static ChatService.Constants.Policies;
 
 namespace ChatService.Endpoints;
 
 internal static class ChatsEndpoints {
     public static RouteGroupBuilder MapChatEndpoints(this RouteGroupBuilder group) {
         group.MapGet("", GetChatsPage);
-        group.MapGet("{id}", GetMessagesPage);
+        group.MapGet("{id}", GetMessagesPage).RequireAuthorization(UserInChat);
 
         return group;
     }

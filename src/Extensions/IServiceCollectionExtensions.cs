@@ -1,8 +1,13 @@
 using System.Reflection;
 using ChatService.Data;
 using ChatService.Interfaces;
+using ChatService.Policies.Handlers;
+using ChatService.Policies.Requirements;
 using ChatService.Services;
 using MassTransit;
+using Microsoft.AspNetCore.Authorization;
+using PR2.Shared.Enums;
+using static ChatService.Constants.Policies;
 
 namespace ChatService.Extensions;
 
@@ -13,13 +18,20 @@ internal static class IServiceCollectionExtensions {
             .AddJsonFile("appsettings.json")
             .Build();
 
-        var cookies = config["Cookies"] ?? throw new Exception("`Cookies` should be defined in `appsettings.json`");
+        var cookies = config["Cookies"] ?? throw new NullReferenceException("`Cookies` should be defined in `appsettings.json`");
 
         services
             .AddAuthentication(cookies)
             .AddCookie(cookies);
 
-        services.AddAuthorization();
+        services.AddAuthorization(config => {
+            config.AddPolicy(UserInChat, policy
+                => policy.Requirements.Add(new MembershipRequirement(MemberRoleTypes.Normal)));
+            config.AddPolicy(OrganizerInChat, policy
+                => policy.Requirements.Add(new MembershipRequirement(MemberRoleTypes.Organizer)));
+            config.AddPolicy(AdminInChat, policy
+                => policy.Requirements.Add(new MembershipRequirement(MemberRoleTypes.Admin)));
+        });
 
         return services;
     }
@@ -45,6 +57,7 @@ internal static class IServiceCollectionExtensions {
     public static IServiceCollection RegisterServices(this IServiceCollection services) {
         return services
                 .AddScoped<DapperDbConnection>()
-                .AddScoped<IChatsService, ChatsService>();
+                .AddScoped<IChatsService, ChatsService>()
+                .AddScoped<IAuthorizationHandler, MembershipHandler>();
     }
 }

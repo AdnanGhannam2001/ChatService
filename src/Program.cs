@@ -9,6 +9,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services
     .AddEndpointsApiExplorer()
     .AddSwaggerGen()
+    .AddHttpContextAccessor()
     .AddRealtimeConnection()
     .AddAuth()
     .AddRabbitMQ()

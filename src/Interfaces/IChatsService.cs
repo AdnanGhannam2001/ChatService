@@ -13,7 +13,7 @@ public interface IChatsService {
     Task<Result<Chat>> GetChatByIdAsync(string id, CancellationToken cancellationToken = default);
     Task<Result<Member>> GetMemberAsync(string chatId, string memberId, CancellationToken cancellationToken = default);
     Task<Result<Page<Message>>> GetMessagesPageAsync(string chatId, int pageNumber, int pageSize, bool desc = false, CancellationToken cancellationToken = default);
-    Task<Result<Message>> GetMessageByIdAsync(string id, CancellationToken cancellationToken);
+    Task<Result<Message>> GetMessageByIdAsync(string id, CancellationToken cancellationToken = default);
     Task<Result<int>> ChangeMemberRoleAsync(string chatId, string memberId, MemberRoleTypes role, CancellationToken cancellationToken = default);
     Task<Result<int>> UpdateMessageAsync(string chatId, string messageId, string content, CancellationToken cancellationToken = default);
     Task<Result<int>> DeleteChatAsync(string id, CancellationToken cancellationToken = default);

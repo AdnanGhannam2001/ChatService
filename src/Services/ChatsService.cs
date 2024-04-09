@@ -1,6 +1,7 @@
 using System.Data;
 using ChatService.Data;
 using ChatService.Data.Sql;
+using ChatService.Exceptions;
 using ChatService.Interfaces;
 using ChatService.Models;
 using Dapper;
@@ -96,6 +97,10 @@ public sealed class ChatsService : IChatsService, IDisposable {
 
         if (!chatResult.IsSuccess) {
             return chatResult.Exceptions;
+        }
+
+        if (!chatResult.Value.IsActive) {
+            return new ChatInactiveException();
         }
 
         if (_db.FullState == ConnectionState.Closed) await _db.OpenAsync(cancellationToken);
@@ -230,6 +235,10 @@ public sealed class ChatsService : IChatsService, IDisposable {
             return chatResult.Exceptions;
         }
 
+        if (!chatResult.Value.IsActive) {
+            return new ChatInactiveException();
+        }
+
         var messageResult = await GetMessageByIdAsync(messageId, cancellationToken);
 
         if (!messageResult.IsSuccess) {
@@ -301,6 +310,10 @@ public sealed class ChatsService : IChatsService, IDisposable {
 
         if (!chatResult.IsSuccess) {
             return chatResult.Exceptions;
+        }
+
+        if (!chatResult.Value.IsActive) {
+            return new ChatInactiveException();
         }
 
         var messageResult = await GetMessageByIdAsync(messageId, cancellationToken);

@@ -9,8 +9,8 @@ internal static class WebApplicationExtensions {
     }
 
     public static async Task HandleDatabaseArgumentsAsync(string[] args, WebApplication app) {
-        var createTables = ArgumentsConstains(args, "-ct", "--create-tables");
-        var seed = ArgumentsConstains(args, "-s", "--seed");
+        var createTables = ArgumentsConstain(args, "-ct", "--create-tables");
+        var seed = ArgumentsConstain(args, "-s", "--seed");
 
         if (!createTables && !seed) return;
 
@@ -34,6 +34,6 @@ internal static class WebApplicationExtensions {
         Environment.Exit(0);
     }
 
-    private static bool ArgumentsConstains(string[] args, string sflag, string lflag)
+    private static bool ArgumentsConstain(string[] args, string sflag, string lflag)
         => args.Contains(sflag) || args.Contains(lflag);
 }

@@ -12,7 +12,9 @@ builder.Services
     .AddHttpContextAccessor()
     .AddRealtimeConnection()
     .AddAuth()
+#if DEBUG && !NO_RABBIT_MQ
     .AddRabbitMQ()
+#endif
     .RegisterServices();
 
 var app = builder.Build();

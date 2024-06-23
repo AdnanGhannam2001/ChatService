@@ -20,7 +20,8 @@ builder.Services
 var app = builder.Build();
 app.HandleCommandArguments(args);
 
-if (app.Environment.IsDevelopment()) {
+if (app.Environment.IsDevelopment())
+{
     app.UseSwagger();
     app.UseSwaggerUI();
 }
@@ -31,7 +32,8 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 // Mock Login
-app.MapGet("/login/{id}", async (string id, HttpContext context) => {
+app.MapGet("/login/{id}", async (string id, HttpContext context) =>
+{
     var cookies = app.Configuration["Cookies"];
 
     var claim = new Claim(ClaimTypes.NameIdentifier, id);

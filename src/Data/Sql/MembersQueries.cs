@@ -1,6 +1,7 @@
 namespace ChatService.Data.Sql;
 
-public static class MembersQueries {
+public static class MembersQueries
+{
     private const string _table = "\"Members\"";
 
     public const string Get = $"""
@@ -8,7 +9,7 @@ public static class MembersQueries {
         FROM {_table}
         WHERE "ChatId" = @ChatId AND "UserId" = @UserId;
     """;
-    
+
     public const string Add = $"""
         INSERT INTO {_table} ("ChatId", "UserId", "Role")
         VALUES (@ChatId, @UserId, @Role);

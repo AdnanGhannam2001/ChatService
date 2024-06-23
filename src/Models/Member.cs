@@ -2,12 +2,14 @@ using PR2.Shared.Enums;
 
 namespace ChatService.Models;
 
-public sealed class Member {
-    #pragma warning disable CS8618
+public sealed class Member
+{
+#pragma warning disable CS8618
     private Member() { }
-    #pragma warning restore CS8618
+#pragma warning restore CS8618
 
-    public Member(string chatId, string userId, MemberRoleTypes role = MemberRoleTypes.Normal) {
+    public Member(string chatId, string userId, MemberRoleTypes role = MemberRoleTypes.Normal)
+    {
         ChatId = chatId;
         UserId = userId;
         Role = role;

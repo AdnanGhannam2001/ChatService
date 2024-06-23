@@ -11,8 +11,10 @@ using static ChatService.Constants.Policies;
 
 namespace ChatService.Extensions;
 
-internal static class IServiceCollectionExtensions {
-    public static IServiceCollection AddAuth(this IServiceCollection services) {
+internal static class IServiceCollectionExtensions
+{
+    public static IServiceCollection AddAuth(this IServiceCollection services)
+    {
         var config = new ConfigurationBuilder()
             .AddJsonFile("appsettings.Development.json")
             .AddJsonFile("appsettings.json")
@@ -24,7 +26,8 @@ internal static class IServiceCollectionExtensions {
             .AddAuthentication(cookies)
             .AddCookie(cookies);
 
-        services.AddAuthorization(config => {
+        services.AddAuthorization(config =>
+        {
             config.AddPolicy(UserInChat, policy
                 => policy.Requirements.Add(new MembershipRequirement(MemberRoleTypes.Normal)));
             config.AddPolicy(OrganizerInChat, policy
@@ -36,25 +39,30 @@ internal static class IServiceCollectionExtensions {
         return services;
     }
 
-    public static IServiceCollection AddRealtimeConnection(this IServiceCollection services) {
+    public static IServiceCollection AddRealtimeConnection(this IServiceCollection services)
+    {
         services.AddSignalR();
 
         return services;
     }
 
-    public static IServiceCollection AddRabbitMQ(this IServiceCollection services) {
-        return services.AddMassTransit(config => {
+    public static IServiceCollection AddRabbitMQ(this IServiceCollection services)
+    {
+        return services.AddMassTransit(config =>
+        {
             var assembly = Assembly.GetExecutingAssembly();
 
             config.RegisterConsumersFromAssembly(assembly);
 
-            config.UsingRabbitMq((context, rmq) => {
+            config.UsingRabbitMq((context, rmq) =>
+            {
                 rmq.ConfigurationReceiveEndpointsFromAssembly(assembly, context);
             });
         });
     }
 
-    public static IServiceCollection RegisterServices(this IServiceCollection services) {
+    public static IServiceCollection RegisterServices(this IServiceCollection services)
+    {
         return services
                 .AddScoped<DapperDbConnection>()
                 .AddScoped<IChatsService, ChatsService>()

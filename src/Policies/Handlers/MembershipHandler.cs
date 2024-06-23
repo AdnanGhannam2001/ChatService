@@ -1,12 +1,8 @@
 using System.Security.Claims;
-using ChatService.Data;
-using ChatService.Data.Sql;
 using ChatService.Interfaces;
 using ChatService.Policies.Requirements;
 using ChatService.Services;
-using Dapper;
 using Microsoft.AspNetCore.Authorization;
-using PR2.Shared.Enums;
 
 namespace ChatService.Policies.Handlers;
 
@@ -30,8 +26,10 @@ internal sealed class MembershipHandler : AuthorizationHandler<MembershipRequire
 
         var memberResult = await _service.GetMemberAsync(chatId!, userId);
 
-        if (memberResult.IsSuccess) {
-            if (ChatsService.HasMinimalRole(memberResult.Value.Role, requirement.MinimalRole)) {
+        if (memberResult.IsSuccess)
+        {
+            if (ChatsService.HasMinimalRole(memberResult.Value.Role, requirement.MinimalRole))
+            {
                 context.Succeed(requirement);
                 return;
             }
@@ -40,7 +38,8 @@ internal sealed class MembershipHandler : AuthorizationHandler<MembershipRequire
 
             var messageResult = await _service.GetMessageByIdAsync(messageId!);
 
-            if (messageResult.IsSuccess && messageResult.Value.SenderId == userId) {
+            if (messageResult.IsSuccess && messageResult.Value.SenderId == userId)
+            {
                 context.Succeed(requirement);
             }
         }

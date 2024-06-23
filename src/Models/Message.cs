@@ -2,12 +2,14 @@ using NanoidDotNet;
 
 namespace ChatService.Models;
 
-public sealed class Message {
-    #pragma warning disable CS8618
+public sealed class Message
+{
+#pragma warning disable CS8618
     private Message() { }
-    #pragma warning restore CS8618
+#pragma warning restore CS8618
 
-    public Message(string chatId, string senderId, string content) {
+    public Message(string chatId, string senderId, string content)
+    {
         Id = Nanoid.Generate(size: 15);
         SenderId = senderId;
         ChatId = chatId;

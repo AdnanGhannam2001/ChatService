@@ -6,7 +6,7 @@ public sealed class Chat {
     #pragma warning restore CS8618
 
     public Chat(string user1Id, string user2Id) {
-        Id = $"{user1Id}_{user2Id}";
+        Id = $"{user1Id}|{user2Id}";
         IsGroup = false;
         IsActive = true;
         Messages = [];

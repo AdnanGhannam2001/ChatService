@@ -4,10 +4,11 @@ using PR2.Shared.Enums;
 
 namespace ChatService.Interfaces;
 
-public interface IChatsService {
+public interface IChatsService
+{
     Task<Result<Chat>> AddGroupChatAsync(string groupId, string creatorId, CancellationToken cancellationToken = default);
     Task<Result<Chat>> AddChatAsync(string user1Id, string user2Id, CancellationToken cancellationToken = default);
-    Task<Result<Member>> AddMemberAsync(string chatId, string memberId, MemberRoleTypes role, CancellationToken cancellationToken = default); 
+    Task<Result<Member>> AddMemberAsync(string chatId, string memberId, MemberRoleTypes role, CancellationToken cancellationToken = default);
     Task<Result<Message>> SendMessageAsync(Message message, CancellationToken cancellationToken = default);
     Task<Page<Chat>> GetChatsPageAsync(string userId, int pageNumber, int pageSize, bool desc = false);
     Task<Result<Chat>> GetChatByIdAsync(string id, CancellationToken cancellationToken = default);

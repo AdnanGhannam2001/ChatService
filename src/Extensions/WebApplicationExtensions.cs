@@ -2,13 +2,16 @@ using ChatService.Data;
 
 namespace ChatService.Extensions;
 
-internal static class WebApplicationExtensions {
-    public static void HandleCommandArguments(this WebApplication app, string[] args) {
+internal static class WebApplicationExtensions
+{
+    public static void HandleCommandArguments(this WebApplication app, string[] args)
+    {
         Task.Run(async () => await HandleDatabaseArgumentsAsync(args, app))
             .Wait();
     }
 
-    public static async Task HandleDatabaseArgumentsAsync(string[] args, WebApplication app) {
+    public static async Task HandleDatabaseArgumentsAsync(string[] args, WebApplication app)
+    {
         var createTables = ArgumentsConstain(args, "-ct", "--create-tables");
         var seed = ArgumentsConstain(args, "-s", "--seed");
 
@@ -19,13 +22,15 @@ internal static class WebApplicationExtensions {
         var dbConnection = scope.ServiceProvider.GetRequiredService<DapperDbConnection>();
         var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
 
-        if (createTables) {
+        if (createTables)
+        {
             logger.LogInformation("Creating Tables...");
             await Database.CreateTablesAsync(dbConnection);
             logger.LogInformation("Tables Were Created Successfully");
         }
 
-        if (seed) {
+        if (seed)
+        {
             logger.LogInformation("Seeding...");
             await Database.SeedAsync(dbConnection);
             logger.LogInformation("Database Were Seeded Successfully");

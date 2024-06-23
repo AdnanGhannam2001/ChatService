@@ -1,6 +1,7 @@
 namespace ChatService.Data.Sql;
 
-public static class MessagesQueries {
+public static class MessagesQueries
+{
     private const string _table = "\"Messages\"";
 
     public const string GetById = $"""

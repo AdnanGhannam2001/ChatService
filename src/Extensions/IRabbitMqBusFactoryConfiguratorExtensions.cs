@@ -4,12 +4,14 @@ using MassTransit;
 
 namespace ChatService.Extensions;
 
-internal static class IRabbitMqBusFactoryConfiguratorExtensions {
+internal static class IRabbitMqBusFactoryConfiguratorExtensions
+{
     public static void ConfigurationReceiveEndpointsFromAssembly(this IRabbitMqBusFactoryConfigurator config,
         Assembly assembly,
         IBusRegistrationContext context)
     {
-        foreach (var klass in GetAssemblyTypesWithAttribute<QueueConsumerAttribute>(assembly)) {
+        foreach (var klass in GetAssemblyTypesWithAttribute<QueueConsumerAttribute>(assembly))
+        {
             var queueAttribute = klass.GetCustomAttribute<QueueConsumerAttribute>()!;
             var queueName = queueAttribute.Name ?? klass.Name.ToKebabCase().Replace("-consumer", "");
 
@@ -20,8 +22,10 @@ internal static class IRabbitMqBusFactoryConfiguratorExtensions {
     private static IEnumerable<Type> GetAssemblyTypesWithAttribute<T>(Assembly assembly)
         where T : Attribute
     {
-        foreach (var type in assembly.GetTypes()) {
-            if (type.GetCustomAttributes<T>().Any()) {
+        foreach (var type in assembly.GetTypes())
+        {
+            if (type.GetCustomAttributes<T>().Any())
+            {
                 yield return type;
             }
         }

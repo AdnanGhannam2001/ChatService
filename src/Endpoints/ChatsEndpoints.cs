@@ -10,8 +10,10 @@ using static ChatService.Constants.Policies;
 
 namespace ChatService.Endpoints;
 
-internal static class ChatsEndpoints {
-    public static RouteGroupBuilder MapChatEndpoints(this RouteGroupBuilder group) {
+internal static class ChatsEndpoints
+{
+    public static RouteGroupBuilder MapChatEndpoints(this RouteGroupBuilder group)
+    {
         group.MapGet("", GetChatsPage);
         group.MapGet("{id}", GetMessagesPage).RequireAuthorization(UserInChat);
         group.MapGet("{id}/join", JoinChat).RequireAuthorization(UserInChat);
@@ -44,7 +46,8 @@ internal static class ChatsEndpoints {
 
         var result = await service.GetMessagesPageAsync(id, pageNumber, pageSize, true);
 
-        if (!result.IsSuccess) {
+        if (!result.IsSuccess)
+        {
             return TypedResults.BadRequest(result.Exceptions);
         }
 
@@ -71,7 +74,8 @@ internal static class ChatsEndpoints {
         var message = new Message(chatId, userId, content);
         var result = await service.SendMessageAsync(message);
 
-        if (!result.IsSuccess) {
+        if (!result.IsSuccess)
+        {
             return TypedResults.BadRequest(result.Exceptions);
         }
 
@@ -87,7 +91,8 @@ internal static class ChatsEndpoints {
     {
         var result = await service.UpdateMessageAsync(chatId, messageId, content);
 
-        if (!result.IsSuccess) {
+        if (!result.IsSuccess)
+        {
             return TypedResults.BadRequest(result.Exceptions);
         }
 
@@ -103,7 +108,8 @@ internal static class ChatsEndpoints {
     {
         var result = await service.DeleteMessageAsync(chatId, messageId);
 
-        if (!result.IsSuccess) {
+        if (!result.IsSuccess)
+        {
             return TypedResults.BadRequest(result.Exceptions);
         }
 

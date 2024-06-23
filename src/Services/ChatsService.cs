@@ -12,12 +12,14 @@ using PR2.Shared.Exceptions;
 
 namespace ChatService.Services;
 
-public sealed class ChatsService : IChatsService, IDisposable {
+public sealed class ChatsService : IChatsService, IDisposable
+{
     #region Fields & Constructor
     private readonly NpgsqlConnection _db;
     private readonly ILogger<ChatsService> _logger;
 
-    public ChatsService(DapperDbConnection connection, ILogger<ChatsService> logger) {
+    public ChatsService(DapperDbConnection connection, ILogger<ChatsService> logger)
+    {
         _logger = logger;
         _db = connection.CreateConnection();
     }
@@ -25,7 +27,8 @@ public sealed class ChatsService : IChatsService, IDisposable {
 
     #region CRUD Operations
     #region CREATE
-    public async Task<Result<Chat>> AddGroupChatAsync(string groupId, string creatorId, CancellationToken cancellationToken = default) {
+    public async Task<Result<Chat>> AddGroupChatAsync(string groupId, string creatorId, CancellationToken cancellationToken = default)
+    {
         var creator = new Member(groupId, creatorId, MemberRoleTypes.Admin);
         var chat = new Chat(groupId, [creator]);
 
@@ -33,14 +36,16 @@ public sealed class ChatsService : IChatsService, IDisposable {
 
         using var transaction = await _db.BeginTransactionAsync();
 
-        try {
+        try
+        {
             await _db.QueryAsync(ChatsQueries.Add, chat, transaction);
 
             await _db.QueryAsync(MembersQueries.Add, creator, transaction);
-            
+
             await transaction.CommitAsync(cancellationToken);
         }
-        catch (Exception) {
+        catch (Exception)
+        {
             await transaction.RollbackAsync();
             return new TransactionFailureException("Failed to create group chat");
         }
@@ -48,14 +53,17 @@ public sealed class ChatsService : IChatsService, IDisposable {
         return chat;
     }
 
-    public async Task<Result<Chat>> AddChatAsync(string user1Id, string user2Id, CancellationToken cancellationToken = default) {
+    public async Task<Result<Chat>> AddChatAsync(string user1Id, string user2Id, CancellationToken cancellationToken = default)
+    {
         var chat = new Chat(user1Id, user2Id);
-        if (cancellationToken.IsCancellationRequested) {
+        if (cancellationToken.IsCancellationRequested)
+        {
             return new OperationCancelledException("Operation just got cancelled");
         }
 
-        if (await _db.QueryAsync<string?>(ChatsQueries.Add, chat) is null) {
-            return new DuplicatedRecordException("Chat already exists");
+        if (await _db.QueryAsync<string?>(ChatsQueries.Add, chat) is null)
+        {
+            await _db.QueryAsync(ChatsQueries.Activate);
         }
 
         return chat;
@@ -68,54 +76,64 @@ public sealed class ChatsService : IChatsService, IDisposable {
     {
         var chatResult = await GetChatByIdAsync(chatId, cancellationToken);
 
-        if (!chatResult.IsSuccess) {
+        if (!chatResult.IsSuccess)
+        {
             return chatResult.Exceptions;
         }
 
-        if (cancellationToken.IsCancellationRequested) {
-            return new OperationCancelledException("Operation just got cancelled");
-        }
-        
         var member = new Member(chatId, memberId, role);
 
-        try {
+        if (cancellationToken.IsCancellationRequested)
+        {
+            return new OperationCancelledException("Operation just got cancelled");
+        }
+
+        try
+        {
             await _db.QueryAsync(MembersQueries.Add, member);
         }
-        catch (Exception) {
+        catch (Exception)
+        {
             return new DuplicatedRecordException("Member already exists in chat");
         }
 
         return member;
     }
 
-    public async Task<Result<Message>> SendMessageAsync(Message message, CancellationToken cancellationToken = default) {
-        if (cancellationToken.IsCancellationRequested) {
-            return new OperationCancelledException("Operation just got cancelled");
-        }
-
+    public async Task<Result<Message>> SendMessageAsync(Message message, CancellationToken cancellationToken = default)
+    {
         var chatResult = await GetChatByIdAsync(message.ChatId, cancellationToken);
 
-        if (!chatResult.IsSuccess) {
+        if (!chatResult.IsSuccess)
+        {
             return chatResult.Exceptions;
         }
 
-        if (!chatResult.Value.IsActive) {
+        if (!chatResult.Value.IsActive)
+        {
             return new ChatInactiveException();
         }
 
+        if (cancellationToken.IsCancellationRequested)
+        {
+            return new OperationCancelledException("Operation just got cancelled");
+        }
+
         if (_db.FullState == ConnectionState.Closed) await _db.OpenAsync(cancellationToken);
-        
+
         using var transaction = _db.BeginTransaction();
         try
         {
             await _db.QueryFirstAsync<string>(MessagesQueries.Add, message, transaction);
-            await _db.QueryAsync(ChatsQueries.NewMessage, new {
-                    Id = message.ChatId,
-                    LastMessageAt = DateTime.UtcNow,
-                }, transaction);
+            await _db.QueryAsync(ChatsQueries.NewMessage, new
+            {
+                Id = message.ChatId,
+                LastMessageAt = DateTime.UtcNow,
+            }, transaction);
             await transaction.CommitAsync(cancellationToken);
         }
-        catch (Exception) {
+        catch (Exception)
+        {
             await transaction.RollbackAsync();
             return new TransactionFailureException("Failed to send a message to chat");
         }
@@ -125,7 +143,8 @@ public sealed class ChatsService : IChatsService, IDisposable {
     #endregion
 
     #region READ
-    public async Task<Page<Chat>> GetChatsPageAsync(string userId, int pageNumber, int pageSize, bool desc = false) {
+    public async Task<Page<Chat>> GetChatsPageAsync(string userId, int pageNumber, int pageSize, bool desc = false)
+    {
         var items = await _db.QueryAsync<Chat>(desc ? ChatsQueries.ListDesc : ChatsQueries.ListAsc,
             new { PageSize = pageSize, PageNumber = pageNumber, UserId = userId });
 
@@ -134,29 +153,35 @@ public sealed class ChatsService : IChatsService, IDisposable {
         return new(items, total);
     }
 
-    public async Task<Result<Chat>> GetChatByIdAsync(string id, CancellationToken cancellationToken = default) {
-        if (cancellationToken.IsCancellationRequested) {
-            return new OperationCancelledException("Operation just got cancelled");
-        }
-
+    public async Task<Result<Chat>> GetChatByIdAsync(string id, CancellationToken cancellationToken = default)
+    {
         var chat = await _db.QueryFirstOrDefaultAsync<Chat?>(ChatsQueries.GetById, new { Id = id });
 
-        if (chat is null) {
+        if (chat is null)
+        {
             return new RecordNotFoundException($"Chat with Id: {id} is not found");
+        }
+
+        if (cancellationToken.IsCancellationRequested)
+        {
+            return new OperationCancelledException("Operation just got cancelled");
         }
 
         return chat;
     }
 
-    public async Task<Result<Member>> GetMemberAsync(string chatId, string memberId, CancellationToken cancellationToken = default) {
-        if (cancellationToken.IsCancellationRequested) {
-            return new OperationCancelledException("Operation just got cancelled");
-        }
-
+    public async Task<Result<Member>> GetMemberAsync(string chatId, string memberId, CancellationToken cancellationToken = default)
+    {
         var member = await _db.QueryFirstOrDefaultAsync<Member>(MembersQueries.Get, new { ChatId = chatId, UserId = memberId });
 
-        if (member is null) {
+        if (member is null)
+        {
             return new RecordNotFoundException($"Member is not found in chat with Id: {chatId}");
+        }
+
+        if (cancellationToken.IsCancellationRequested)
+        {
+            return new OperationCancelledException("Operation just got cancelled");
         }
 
         return member;
@@ -170,7 +195,8 @@ public sealed class ChatsService : IChatsService, IDisposable {
     {
         var chatResult = await GetChatByIdAsync(chatId, cancellationToken);
 
-        if (!chatResult.IsSuccess) {
+        if (!chatResult.IsSuccess)
+        {
             return chatResult.Exceptions;
         }
 
@@ -181,23 +207,26 @@ public sealed class ChatsService : IChatsService, IDisposable {
 
         return new Page<Message>(items, total);
     }
-    
-    public async Task<Result<Message>> GetMessageByIdAsync(string id, CancellationToken cancellationToken = default) {
-        if (cancellationToken.IsCancellationRequested) {
+
+    public async Task<Result<Message>> GetMessageByIdAsync(string id, CancellationToken cancellationToken = default)
+    {
+        if (cancellationToken.IsCancellationRequested)
+        {
             return new OperationCancelledException("Operation just got cancelled");
         }
 
         var message = await _db.QueryFirstOrDefaultAsync(MessagesQueries.GetById,
             new { Id = id });
 
-        if (message is null) {
+        if (message is null)
+        {
             return new RecordNotFoundException("Message is not found");
         }
 
         return message;
     }
     #endregion
-    
+
 
     #region UPDATE
     public async Task<Result<int>> ChangeMemberRoleAsync(string chatId,
@@ -207,15 +236,18 @@ public sealed class ChatsService : IChatsService, IDisposable {
     {
         var chatResult = await GetChatByIdAsync(chatId, cancellationToken);
 
-        if (!chatResult.IsSuccess) {
+        if (!chatResult.IsSuccess)
+        {
             return chatResult.Exceptions;
         }
 
-        if (cancellationToken.IsCancellationRequested) {
+        if (cancellationToken.IsCancellationRequested)
+        {
             return new OperationCancelledException("Operation just got cancelled");
         }
-        
-        await _db.QueryAsync<int>(MembersQueries.ChangeRole, new {
+
+        await _db.QueryAsync<int>(MembersQueries.ChangeRole, new
+        {
             ChatId = chatId,
             UserId = memberId,
             Role = role
@@ -231,55 +263,64 @@ public sealed class ChatsService : IChatsService, IDisposable {
     {
         var chatResult = await GetChatByIdAsync(chatId, cancellationToken);
 
-        if (!chatResult.IsSuccess) {
+        if (!chatResult.IsSuccess)
+        {
             return chatResult.Exceptions;
         }
 
-        if (!chatResult.Value.IsActive) {
+        if (!chatResult.Value.IsActive)
+        {
             return new ChatInactiveException();
         }
 
         var messageResult = await GetMessageByIdAsync(messageId, cancellationToken);
 
-        if (!messageResult.IsSuccess) {
+        if (!messageResult.IsSuccess)
+        {
             return messageResult.Exceptions;
         }
 
-        if (cancellationToken.IsCancellationRequested) {
+        if (cancellationToken.IsCancellationRequested)
+        {
             return new OperationCancelledException("Operation just got cancelled");
         }
 
         if (_db.FullState == ConnectionState.Closed) await _db.OpenAsync(cancellationToken);
-        
+
         using var transaction = _db.BeginTransaction();
 
-        try {
+        try
+        {
             await _db.QueryAsync(MessagesQueries.Update,
                 new { Id = messageId, Content = content });
-            await _db.QueryAsync(ChatsQueries.NewMessage, new {
-                    Id = messageResult.Value.ChatId,
-                    LastMessageAt = DateTime.UtcNow,
-                }, transaction);
+            await _db.QueryAsync(ChatsQueries.NewMessage, new
+            {
+                Id = messageResult.Value.ChatId,
+                LastMessageAt = DateTime.UtcNow,
+            }, transaction);
 
             await transaction.CommitAsync(cancellationToken);
-            
+
             return 1;
         }
-        catch (Exception) {
+        catch (Exception)
+        {
             await transaction.RollbackAsync();
             return new TransactionFailureException("Failed to send a message to chat");
         }
     }
     #endregion
-    
+
     #region DELETE
-    public async Task<Result<int>> DeleteChatAsync(string id, CancellationToken cancellationToken = default) {
+    public async Task<Result<int>> DeleteChatAsync(string id, CancellationToken cancellationToken = default)
+    {
         var chatResult = await GetChatByIdAsync(id, cancellationToken);
 
-        if (!chatResult.IsSuccess) {
+        if (!chatResult.IsSuccess)
+        {
             return chatResult.Exceptions;
         }
-        
+
         await _db.QueryAsync(ChatsQueries.SoftDelete, new { Id = id });
 
         return 1;
@@ -291,11 +332,13 @@ public sealed class ChatsService : IChatsService, IDisposable {
     {
         var chatResult = await GetChatByIdAsync(chatId, cancellationToken);
 
-        if (!chatResult.IsSuccess) {
+        if (!chatResult.IsSuccess)
+        {
             return chatResult.Exceptions;
         }
 
-        if (cancellationToken.IsCancellationRequested) {
+        if (cancellationToken.IsCancellationRequested)
+        {
             return new OperationCancelledException("Operation just got cancelled");
         }
 
@@ -305,24 +348,29 @@ public sealed class ChatsService : IChatsService, IDisposable {
         return 1;
     }
 
-    public async Task<Result<int>> DeleteMessageAsync(string chatId, string messageId, CancellationToken cancellationToken = default) {
+    public async Task<Result<int>> DeleteMessageAsync(string chatId, string messageId, CancellationToken cancellationToken = default)
+    {
         var chatResult = await GetChatByIdAsync(chatId, cancellationToken);
 
-        if (!chatResult.IsSuccess) {
+        if (!chatResult.IsSuccess)
+        {
             return chatResult.Exceptions;
         }
 
-        if (!chatResult.Value.IsActive) {
+        if (!chatResult.Value.IsActive)
+        {
             return new ChatInactiveException();
         }
 
         var messageResult = await GetMessageByIdAsync(messageId, cancellationToken);
 
-        if (!messageResult.IsSuccess) {
+        if (!messageResult.IsSuccess)
+        {
             return messageResult.Exceptions;
         }
 
-        if (cancellationToken.IsCancellationRequested) {
+        if (cancellationToken.IsCancellationRequested)
+        {
             return new OperationCancelledException("Operation just got cancelled");
         }
 

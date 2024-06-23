@@ -1,6 +1,7 @@
 namespace ChatService.Data.Sql;
 
-public static class ChatsQueries {
+public static class ChatsQueries
+{
     private const string _table = "\"Chats\"";
 
     public const string Add = $"""
@@ -44,6 +45,12 @@ public static class ChatsQueries {
     public const string NewMessage = $"""
         UPDATE {_table}
         SET "LastMessageAt" = @LastMessageAt
+        WHERE "Id" = @Id;
+    """;
+
+    public const string Activate = $"""
+        UPDATE {_table}
+        SET "IsActive" = TRUE
         WHERE "Id" = @Id;
     """;
 

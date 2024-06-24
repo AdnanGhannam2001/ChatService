@@ -6,7 +6,7 @@ internal static class HttpContextExtensions
 {
     public static bool TryGetUserId(this HttpContext context, out string userId)
     {
-        var idClaim = context.User.Claims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier);
+        var idClaim = context.User.Claims.FirstOrDefault(x => x.Type == "sub");
 
         if (idClaim is null)
         {

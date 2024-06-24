@@ -18,7 +18,8 @@ public static class MessagesQueries
 
     public const string Count = $"""
         SELECT COUNT(*)
-        FROM {_table};
+        FROM {_table}
+        WHERE "ChatId" = @ChatId;
     """;
 
     public const string ListAsc = $"""

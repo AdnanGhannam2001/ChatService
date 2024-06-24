@@ -51,9 +51,7 @@ app.MapHub<ChatHub>("/websocket/chat");
 
 app.MapGroup("api/chats")
     .MapChatEndpoints()
-    .RequireAuthorization();
-
-app.Map("test", () => "123")
-    .RequireAuthorization();
+    .RequireAuthorization()
+    .WithOpenApi();
 
 app.Run();

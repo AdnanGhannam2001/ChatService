@@ -148,7 +148,7 @@ public sealed class ChatsService : IChatsService, IDisposable
         var items = await _db.QueryAsync<Chat>(desc ? ChatsQueries.ListDesc : ChatsQueries.ListAsc,
             new { PageSize = pageSize, PageNumber = pageNumber, UserId = userId });
 
-        var total = await _db.QueryFirstAsync<int>(ChatsQueries.Count);
+        var total = await _db.QueryFirstAsync<int>(ChatsQueries.Count, new { UserId = userId });
 
         return new(items, total);
     }
@@ -203,7 +203,7 @@ public sealed class ChatsService : IChatsService, IDisposable
         var items = await _db.QueryAsync<Message>(desc ? MessagesQueries.ListDesc : MessagesQueries.ListAsc,
             new { PageNumber = pageNumber, PageSize = pageSize });
 
-        var total = await _db.QueryFirstAsync<int>(MessagesQueries.Count);
+        var total = await _db.QueryFirstAsync<int>(MessagesQueries.Count, new { ChatId = chatId });
 
         return new Page<Message>(items, total);
     }
@@ -215,7 +215,7 @@ public sealed class ChatsService : IChatsService, IDisposable
             return new OperationCancelledException("Operation just got cancelled");
         }
 
-        var message = await _db.QueryFirstOrDefaultAsync(MessagesQueries.GetById,
+        var message = await _db.QueryFirstOrDefaultAsync<Message>(MessagesQueries.GetById,
             new { Id = id });
 
         if (message is null)

@@ -2,7 +2,7 @@ using ChatService.Models;
 
 namespace ChatService.Interfaces;
 
-internal interface IChatClient
+public interface IChatClient
 {
     Task SendConnectionId(string connectionId);
 

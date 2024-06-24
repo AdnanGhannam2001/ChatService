@@ -22,7 +22,7 @@ internal sealed class MembershipHandler : AuthorizationHandler<MembershipRequire
     {
         var routeData = _httpContext.GetRouteData().Values;
         var chatId = routeData["id"] as string;
-        var userId = context.User.Claims.First(c => c.Type == ClaimTypes.NameIdentifier).Value;
+        var userId = context.User.Claims.First(c => c.Type == "sub").Value;
 
         var memberResult = await _service.GetMemberAsync(chatId!, userId);
 

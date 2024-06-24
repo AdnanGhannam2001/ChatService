@@ -11,8 +11,18 @@ public static class ChatsQueries
     """;
 
     public const string Count = $"""
-        SELECT COUNT(*)
-        FROM {_table};
+        SELECT
+            (
+                SELECT COUNT(*)
+                FROM "Members" 
+                WHERE "Members"."UserId" = @UserId
+            )
+            +
+            (
+                SELECT COUNT(*)
+                FROM {_table} t
+                WHERE "Id" LIKE CONCAT('%', @UserId, '%')
+            );
     """;
 
     public const string GetById = $"""
@@ -21,12 +31,16 @@ public static class ChatsQueries
         WHERE "Id" = @Id;
     """;
 
-    // TODO Get User Chats too (not only group chats)
     public const string ListAsc = $"""
         SELECT *
-        FROM {_table}
-        JOIN "Members" ON {_table}."Id" = "Members"."ChatId"
-        WHERE "Members"."UserId" = @UserId
+        FROM {_table} t
+        WHERE 0 < (
+                SELECT COUNT(*)
+                FROM "Members" 
+                WHERE t."Id" = "Members"."ChatId" AND "Members"."UserId" = @UserId
+            )
+            OR 
+            "Id" LIKE CONCAT('%', @UserId, '%')
         ORDER BY "LastMessageAt" ASC
         LIMIT @PageSize
         OFFSET @PageNumber;
@@ -34,9 +48,14 @@ public static class ChatsQueries
 
     public const string ListDesc = $"""
         SELECT *
-        FROM {_table}
-        JOIN "Members" ON {_table}."Id" = "Members"."ChatId"
-        WHERE "Members"."UserId" = @UserId
+        FROM {_table} t
+        WHERE 0 < (
+                SELECT COUNT(*)
+                FROM "Members" 
+                WHERE t."Id" = "Members"."ChatId" AND "Members"."UserId" = @UserId
+            )
+            OR 
+            "Id" LIKE CONCAT('%', @UserId, '%')
         ORDER BY "LastMessageAt" DESC
         LIMIT @PageSize
         OFFSET @PageNumber;

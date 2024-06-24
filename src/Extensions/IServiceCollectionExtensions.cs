@@ -6,6 +6,7 @@ using ChatService.Policies.Requirements;
 using ChatService.Services;
 using MassTransit;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.DataProtection;
 using PR2.Shared.Enums;
 using static ChatService.Constants.Policies;
 
@@ -20,11 +21,12 @@ internal static class IServiceCollectionExtensions
             .AddJsonFile("appsettings.json")
             .Build();
 
-        var cookies = config["Cookies"] ?? throw new NullReferenceException("`Cookies` should be defined in `appsettings.json`");
+        services.AddDataProtection()
+            .SetApplicationName("SocialMedia");
 
         services
-            .AddAuthentication(cookies)
-            .AddCookie(cookies);
+            .AddAuthentication("SocialMediaCookies")
+            .AddCookie("SocialMediaCookies");
 
         services.AddAuthorization(config =>
         {

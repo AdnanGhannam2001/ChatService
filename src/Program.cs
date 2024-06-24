@@ -53,4 +53,7 @@ app.MapGroup("api/chats")
     .MapChatEndpoints()
     .RequireAuthorization();
 
+app.Map("test", () => "123")
+    .RequireAuthorization();
+
 app.Run();

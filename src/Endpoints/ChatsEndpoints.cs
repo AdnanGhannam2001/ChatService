@@ -1,3 +1,4 @@
+using ChatService.Dtos;
 using ChatService.Extensions;
 using ChatService.Hubs;
 using ChatService.Interfaces;
@@ -16,7 +17,7 @@ internal static class ChatsEndpoints
     {
         group.MapGet("", GetChatsPage);
         group.MapGet("{id}", GetMessagesPage).RequireAuthorization(UserInChat);
-        group.MapGet("{id}/join", JoinChat).RequireAuthorization(UserInChat);
+        group.MapPost("{id}/join", JoinChat).RequireAuthorization(UserInChat);
         group.MapPost("{id}", SendMessage).RequireAuthorization(UserInChat);
         group.MapPatch("{id}/{messageId}", UpdateMessage).RequireAuthorization(OrganizerInChat);
         group.MapDelete("{id}/{messageId}", DeleteMessage).RequireAuthorization(OrganizerInChat);
@@ -27,11 +28,12 @@ internal static class ChatsEndpoints
     private static async Task<Ok<Page<Chat>>> GetChatsPage(HttpContext context,
         [FromServices] IChatsService service,
         [FromQuery] int pageNumber = 0,
-        [FromQuery] int pageSize = 10)
+        [FromQuery] int pageSize = 10,
+        [FromQuery] bool desc = true)
     {
         _ = context.TryGetUserId(out var userId);
 
-        var page = await service.GetChatsPageAsync(userId, pageNumber, pageSize, true);
+        var page = await service.GetChatsPageAsync(userId, pageNumber, pageSize, desc);
 
         return TypedResults.Ok(page);
     }
@@ -40,11 +42,12 @@ internal static class ChatsEndpoints
         [FromServices] IChatsService service,
         [FromRoute] string id,
         [FromQuery] int pageNumber = 0,
-        [FromQuery] int pageSize = 10)
+        [FromQuery] int pageSize = 10,
+        [FromQuery] bool desc = true)
     {
         _ = context.TryGetUserId(out var userId);
 
-        var result = await service.GetMessagesPageAsync(id, pageNumber, pageSize, true);
+        var result = await service.GetMessagesPageAsync(id, pageNumber, pageSize, desc);
 
         if (!result.IsSuccess)
         {
@@ -56,7 +59,7 @@ internal static class ChatsEndpoints
 
     private static async Task<Results<Ok, BadRequest<ExceptionBase[]>>> JoinChat([FromServices] IHubContext<ChatHub, IChatClient> hub,
         [FromRoute(Name = "id")] string chatId,
-        [FromHeader] string connectionId)
+        [FromQuery] string connectionId)
     {
         await hub.Groups.AddToGroupAsync(connectionId, chatId);
         return TypedResults.Ok();
@@ -67,11 +70,11 @@ internal static class ChatsEndpoints
         [FromServices] IChatsService service,
         [FromServices] IHubContext<ChatHub, IChatClient> hub,
         [FromRoute(Name = "id")] string chatId,
-        [FromHeader] string content)
+        [FromBody] SendMessageRequest dto)
     {
         context.TryGetUserId(out var userId);
 
-        var message = new Message(chatId, userId, content);
+        var message = new Message(chatId, userId, dto.Content);
         var result = await service.SendMessageAsync(message);
 
         if (!result.IsSuccess)

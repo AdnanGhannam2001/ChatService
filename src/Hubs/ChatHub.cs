@@ -7,5 +7,5 @@ namespace ChatService.Hubs;
 [Authorize]
 internal sealed class ChatHub : Hub<IChatClient>
 {
-    public async Task GetConnectionId() => await Clients.Caller.SendConnectionId(Context.ConnectionId);
+    public Task<string> GetConnectionId() => Task.FromResult(Context.ConnectionId);
 }

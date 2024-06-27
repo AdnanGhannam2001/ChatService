@@ -201,7 +201,7 @@ public sealed class ChatsService : IChatsService, IDisposable
         }
 
         var items = await _db.QueryAsync<Message>(desc ? MessagesQueries.ListDesc : MessagesQueries.ListAsc,
-            new { PageNumber = pageNumber, PageSize = pageSize });
+            new { ChatId = chatId, PageNumber = pageNumber, PageSize = pageSize });
 
         var total = await _db.QueryFirstAsync<int>(MessagesQueries.Count, new { ChatId = chatId });
 
@@ -292,7 +292,7 @@ public sealed class ChatsService : IChatsService, IDisposable
         try
         {
             await _db.QueryAsync(MessagesQueries.Update,
-                new { Id = messageId, Content = content });
+                new { Id = messageId, Content = content, LastUpdateAt = DateTime.UtcNow });
             await _db.QueryAsync(ChatsQueries.NewMessage, new
             {
                 Id = messageResult.Value.ChatId,
@@ -382,7 +382,7 @@ public sealed class ChatsService : IChatsService, IDisposable
     #endregion
 
     #region Static
-    public static bool HasMinimalRole(MemberRoleTypes memberRole, MemberRoleTypes minimalRole) => memberRole >= minimalRole;
+    public static bool HasMinimalRole(MemberRoleTypes memberRole, MemberRoleTypes minimalRole) => memberRole <= minimalRole;
     #endregion
 
     public void Dispose() => _db.Dispose();

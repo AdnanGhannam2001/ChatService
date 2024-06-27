@@ -1,8 +1,6 @@
-using System.Security.Claims;
 using ChatService.Endpoints;
 using ChatService.Extensions;
 using ChatService.Hubs;
-using Microsoft.AspNetCore.Authentication;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,6 +10,7 @@ builder.Services
     .AddHttpContextAccessor()
     .AddRealtimeConnection()
     .AddAuth()
+    .AddCors()
 #if DEBUG && !NO_RABBIT_MQ
     .AddRabbitMQ()
 #endif
@@ -28,24 +27,17 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseCors(x =>
+{
+    x
+        .SetIsOriginAllowed(x => true)
+        .AllowAnyMethod()
+        .AllowAnyHeader()
+        .AllowCredentials();
+});
+
 app.UseAuthentication();
 app.UseAuthorization();
-
-// Mock Login
-app.MapGet("/login/{id}", async (string id, HttpContext context) =>
-{
-    var cookies = app.Configuration["Cookies"];
-
-    var claim = new Claim(ClaimTypes.NameIdentifier, id);
-
-    var identity = new ClaimsIdentity([claim], cookies);
-
-    var principal = new ClaimsPrincipal(identity);
-
-    await context.SignInAsync(principal);
-
-    return Results.Ok("Logged In");
-});
 
 app.MapHub<ChatHub>("/websocket/chat");
 

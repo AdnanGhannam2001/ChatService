@@ -11,8 +11,8 @@ public static class MessagesQueries
     """;
 
     public const string Add = $"""
-        INSERT INTO {_table} ("Id", "ChatId", "SenderId", "Content")
-        VALUES (@Id, @ChatId, @SenderId, @Content)
+        INSERT INTO {_table} ("Id", "ChatId", "SenderId", "Content", "SentAt", "LastUpdateAt")
+        VALUES (@Id, @ChatId, @SenderId, @Content, @SentAt, @LastUpdateAt)
         RETURNING "Id";
     """;
 
@@ -25,22 +25,25 @@ public static class MessagesQueries
     public const string ListAsc = $"""
         SELECT *
         FROM {_table}
+        WHERE "ChatId" = @ChatId
         ORDER BY "SentAt" ASC
         LIMIT @PageSize
-        OFFSET @PageNumber;
+        OFFSET @PageNumber * @PageSize;
     """;
 
     public const string ListDesc = $"""
         SELECT *
         FROM {_table}
+        WHERE "ChatId" = @ChatId
         ORDER BY "SentAt" DESC
         LIMIT @PageSize
-        OFFSET @PageNumber;
+        OFFSET @PageNumber * @PageSize;
     """;
 
     public const string Update = $"""
         UPDATE {_table}
         SET "Content" = @Content
+        SET "LastUpdateAt" = @LastUpdateAt
         WHERE "Id" = @Id;
     """;
 

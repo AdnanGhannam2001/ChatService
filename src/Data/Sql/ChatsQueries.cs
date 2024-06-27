@@ -43,7 +43,7 @@ public static class ChatsQueries
             "Id" LIKE CONCAT('%', @UserId, '%')
         ORDER BY "LastMessageAt" ASC
         LIMIT @PageSize
-        OFFSET @PageNumber;
+        OFFSET @PageNumber * @PageSize;
     """;
 
     public const string ListDesc = $"""
@@ -58,7 +58,7 @@ public static class ChatsQueries
             "Id" LIKE CONCAT('%', @UserId, '%')
         ORDER BY "LastMessageAt" DESC
         LIMIT @PageSize
-        OFFSET @PageNumber;
+        OFFSET @PageNumber * @PageSize;
     """;
 
     public const string NewMessage = $"""

@@ -16,7 +16,7 @@ public static class Database
                 "Id" VARCHAR(255) NOT NULL,
                 "IsGroup" BOOLEAN DEFAULT FALSE,
                 "IsActive" BOOLEAN DEFAULT TRUE,
-                "LastMessageAt" DATE,
+                "LastMessageAt" TIMESTAMPTZ,
                 PRIMARY KEY ("Id")
             );
         """);
@@ -37,8 +37,8 @@ public static class Database
                 "SenderId" VARCHAR(255) NOT NULL,
                 "ChatId" VARCHAR(255) NOT NULL,
                 "Content" VARCHAR(1000) NOT NULL, 
-                "SentAt" DATE,
-                "LastUpdateAt" DATE,
+                "SentAt" TIMESTAMPTZ,
+                "LastUpdateAt" TIMESTAMPTZ,
                 PRIMARY KEY ("Id"),
                 FOREIGN KEY ("ChatId") REFERENCES "Chats"("Id")
             );

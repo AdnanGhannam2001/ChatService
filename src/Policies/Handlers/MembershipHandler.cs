@@ -28,7 +28,7 @@ internal sealed class MembershipHandler : AuthorizationHandler<MembershipRequire
 
         if (memberResult.IsSuccess)
         {
-            if (ChatsService.HasMinimalRole(memberResult.Value.Role, requirement.MinimalRole))
+            if (memberResult.Value.UserId == userId || ChatsService.HasMinimalRole(memberResult.Value.Role, requirement.MinimalRole))
             {
                 context.Succeed(requirement);
                 return;

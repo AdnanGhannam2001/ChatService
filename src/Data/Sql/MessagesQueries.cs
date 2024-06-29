@@ -42,8 +42,9 @@ public static class MessagesQueries
 
     public const string Update = $"""
         UPDATE {_table}
-        SET "Content" = @Content
-        SET "LastUpdateAt" = @LastUpdateAt
+        SET
+            "Content" = @Content,
+            "LastUpdateAt" = @LastUpdateAt
         WHERE "Id" = @Id;
     """;
 

@@ -90,16 +90,16 @@ internal static class ChatsEndpoints
         [FromServices] IHubContext<ChatHub, IChatClient> hub,
         [FromRoute(Name = "id")] string chatId,
         [FromRoute] string messageId,
-        [FromHeader] string content)
+        [FromBody] SendMessageRequest dto)
     {
-        var result = await service.UpdateMessageAsync(chatId, messageId, content);
+        var result = await service.UpdateMessageAsync(chatId, messageId, dto.Content);
 
         if (!result.IsSuccess)
         {
             return TypedResults.BadRequest(result.Exceptions);
         }
 
-        await hub.Clients.Group(chatId).MessageUpdated(messageId, content);
+        await hub.Clients.Group(chatId).MessageUpdated(messageId, dto.Content);
 
         return TypedResults.Ok();
     }

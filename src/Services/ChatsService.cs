@@ -305,7 +305,6 @@ public sealed class ChatsService : IChatsService, IDisposable
         }
         catch (Exception)
         {
-            throw;
             await transaction.RollbackAsync();
             return new TransactionFailureException("Failed to update message in chat");
         }

@@ -1,11 +1,14 @@
+// TODO Move Models to Data/Models
 namespace ChatService.Models;
 
-public sealed class Chat {
-    #pragma warning disable CS8618
+public sealed class Chat
+{
+#pragma warning disable CS8618
     private Chat() { }
-    #pragma warning restore CS8618
+#pragma warning restore CS8618
 
-    public Chat(string user1Id, string user2Id) {
+    public Chat(string user1Id, string user2Id)
+    {
         Id = $"{user1Id}|{user2Id}";
         IsGroup = false;
         IsActive = true;
@@ -13,7 +16,8 @@ public sealed class Chat {
         Members = null;
     }
 
-    public Chat(string groupId, IEnumerable<Member> members) {
+    public Chat(string groupId, IEnumerable<Member> members)
+    {
         Id = groupId;
         IsGroup = true;
         IsActive = true;
@@ -22,6 +26,7 @@ public sealed class Chat {
     }
 
     public string Id { get; init; }
+    // TODO Make this init
     public bool IsGroup { get; private set; }
     public bool IsActive { get; private set; }
     public DateTime? LastMessageAt { get; private set; }

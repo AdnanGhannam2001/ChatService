@@ -1,10 +1,8 @@
-using System.Reflection;
 using ChatService.Data;
 using ChatService.Interfaces;
 using ChatService.Policies.Handlers;
 using ChatService.Policies.Requirements;
 using ChatService.Services;
-using MassTransit;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.DataProtection;
 using PR2.Shared.Enums;
@@ -46,21 +44,6 @@ internal static class IServiceCollectionExtensions
         services.AddSignalR();
 
         return services;
-    }
-
-    public static IServiceCollection AddRabbitMQ(this IServiceCollection services)
-    {
-        return services.AddMassTransit(config =>
-        {
-            var assembly = Assembly.GetExecutingAssembly();
-
-            config.RegisterConsumersFromAssembly(assembly);
-
-            config.UsingRabbitMq((context, rmq) =>
-            {
-                rmq.ConfigurationReceiveEndpointsFromAssembly(assembly, context);
-            });
-        });
     }
 
     public static IServiceCollection RegisterServices(this IServiceCollection services)

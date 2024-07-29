@@ -1,7 +1,7 @@
-using ChatService.Attributes;
 using ChatService.Interfaces;
 using MassTransit;
 using PR2.Contracts.Events;
+using PR2.RabbitMQ.Attributes;
 using PR2.Shared.Enums;
 
 namespace ChatService.Consumers;

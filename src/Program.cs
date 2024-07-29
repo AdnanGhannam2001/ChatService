@@ -1,6 +1,8 @@
+using System.Reflection;
 using ChatService.Endpoints;
 using ChatService.Extensions;
 using ChatService.Hubs;
+using PR2.RabbitMQ.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,7 +14,7 @@ builder.Services
     .AddAuth()
     .AddCors()
 #if DEBUG && !NO_RABBIT_MQ
-    .AddRabbitMQ()
+    .AddRabbitMQ(Assembly.GetExecutingAssembly())
 #endif
     .RegisterServices();
 

@@ -24,8 +24,9 @@ internal static class WebApplicationExtensions
 
         if (createTables)
         {
+            var connectionString = app.Configuration.GetConnectionString("PostgresConnection");
             logger.LogInformation("Creating Tables...");
-            await Database.CreateTablesAsync(dbConnection);
+            Database.Init(connectionString!);
             logger.LogInformation("Tables Were Created Successfully");
         }
 

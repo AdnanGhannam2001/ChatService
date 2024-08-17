@@ -1,4 +1,4 @@
-using ChatService.Models;
+using ChatService.Data.Models;
 using PR2.Shared.Common;
 
 namespace ChatService.Exceptions;

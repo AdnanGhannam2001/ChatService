@@ -1,9 +1,9 @@
 using System.Data;
 using ChatService.Data;
+using ChatService.Data.Models;
 using ChatService.Data.Sql;
 using ChatService.Exceptions;
 using ChatService.Interfaces;
-using ChatService.Models;
 using Dapper;
 using Npgsql;
 using PR2.Shared.Common;

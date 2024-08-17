@@ -1,6 +1,6 @@
 using NanoidDotNet;
 
-namespace ChatService.Models;
+namespace ChatService.Data.Models;
 
 public sealed class Message
 {

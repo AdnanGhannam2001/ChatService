@@ -1,4 +1,4 @@
-using ChatService.Models;
+using ChatService.Data.Models;
 using PR2.Shared.Common;
 using PR2.Shared.Enums;
 

@@ -1,8 +1,8 @@
+using ChatService.Data.Models;
 using ChatService.Dtos;
 using ChatService.Extensions;
 using ChatService.Hubs;
 using ChatService.Interfaces;
-using ChatService.Models;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;

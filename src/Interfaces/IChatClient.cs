@@ -1,4 +1,4 @@
-using ChatService.Models;
+using ChatService.Data.Models;
 
 namespace ChatService.Interfaces;
 

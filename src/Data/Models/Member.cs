@@ -1,6 +1,6 @@
 using PR2.Shared.Enums;
 
-namespace ChatService.Models;
+namespace ChatService.Data.Models;
 
 public sealed class Member
 {

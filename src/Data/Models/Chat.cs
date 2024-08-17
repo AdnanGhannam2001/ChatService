@@ -1,5 +1,4 @@
-// TODO Move Models to Data/Models
-namespace ChatService.Models;
+namespace ChatService.Data.Models;
 
 public sealed class Chat
 {

@@ -1,5 +1,5 @@
+using ChatService.Data.Models;
 using ChatService.Data.Sql;
-using ChatService.Models;
 using Dapper;
 using DbUp;
 using NanoidDotNet;

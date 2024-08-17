@@ -19,8 +19,7 @@ internal sealed class FriendshipDeletedEventConsumer : IConsumer<FriendshipDelet
 
     public async Task Consume(ConsumeContext<FriendshipDeletedEvent> context)
     {
-        // TODO: fix this bc this may cause a problem
-        var id = $"{context.Message.FriendId}_{context.Message.UserId}";
+        var id = $"{context.Message.FriendId}|{context.Message.UserId}";
         var result = await _service.DeleteChatAsync(id);
 
         if (!result.IsSuccess)

@@ -321,7 +321,14 @@ public sealed class ChatsService : IChatsService, IDisposable
             return chatResult.Exceptions;
         }
 
-        await _db.QueryAsync(ChatsQueries.SoftDelete, new { Id = id });
+        if (chatResult.Value.IsGroup)
+        {
+            await _db.QueryAsync(ChatsQueries.SoftDelete, new { Id = id });
+        }
+        else
+        {
+            await _db.QueryAsync(ChatsQueries.Delete, new { Id = id });
+        }
 
         return 1;
     }

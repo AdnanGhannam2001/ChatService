@@ -25,8 +25,7 @@ public sealed class Chat
     }
 
     public string Id { get; init; }
-    // TODO Make this init
-    public bool IsGroup { get; private set; }
+    public bool IsGroup { get; init; }
     public bool IsActive { get; private set; }
     public DateTime? LastMessageAt { get; private set; }
     public ICollection<Message> Messages { get; private set; }

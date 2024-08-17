@@ -81,7 +81,6 @@ public static class ChatsQueries
 
     public const string Delete = $"""
         DELETE FROM {_table}
-        WHERE "Id" = @Id
-        RETURNING "_computed";
+        WHERE "Id" = @Id;
     """;
 }

@@ -1,3 +1,4 @@
+using ChatService.Constants;
 using ChatService.Data;
 
 namespace ChatService.Extensions;
@@ -24,7 +25,7 @@ internal static class WebApplicationExtensions
 
         if (createTables)
         {
-            var connectionString = app.Configuration.GetConnectionString("PostgresConnection");
+            var connectionString = app.Configuration.GetConnectionString(DatabaseConstants.ConnectionStringName);
             logger.LogInformation("Creating Tables...");
             Database.Init(connectionString!);
             logger.LogInformation("Tables Were Created Successfully");

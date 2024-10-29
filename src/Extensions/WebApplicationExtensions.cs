@@ -25,7 +25,7 @@ internal static class WebApplicationExtensions
 
         if (createTables)
         {
-            var connectionString = app.Configuration.GetConnectionString(DatabaseConstants.ConnectionStringName);
+            var connectionString = app.Configuration.GetConnectionString(CommonConstants.ConnectionStringName);
             logger.LogInformation("Creating Tables...");
             Database.Init(connectionString!);
             logger.LogInformation("Tables Were Created Successfully");

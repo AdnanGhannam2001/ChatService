@@ -15,7 +15,7 @@
     <PackageReference Include="Nanoid" Version="3.0.0" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.2" />
     <PackageReference Include="PR2.Contracts" Version="1.0.3" />
-    <PackageReference Include="PR2.RabbitMQ" Version="1.0.0" />
+    <PackageReference Include="PR2.RabbitMQ" Version="1.1.0" />
     <PackageReference Include="PR2.Shared" Version="1.5.4" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
   </ItemGroup>

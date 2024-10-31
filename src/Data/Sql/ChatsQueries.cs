@@ -83,4 +83,6 @@ public static class ChatsQueries
         DELETE FROM {_table}
         WHERE "Id" = @Id;
     """;
+
+    public const string Clear = $"DELETE FROM {_table};";
 }

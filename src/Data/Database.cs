@@ -23,6 +23,13 @@ public static class Database
         }
     }
 
+    public static async Task ClearAsync(DapperDbConnection connection)
+    {
+        using var db = connection.CreateConnection();
+        await db.QueryAsync(MessagesQueries.Clear);
+        await db.QueryAsync(MembersQueries.Clear);
+        await db.QueryAsync(ChatsQueries.Clear);
+    }
 
     public static async Task SeedAsync(DapperDbConnection connection)
     {

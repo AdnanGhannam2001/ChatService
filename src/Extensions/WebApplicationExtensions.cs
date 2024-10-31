@@ -13,22 +13,30 @@ internal static class WebApplicationExtensions
 
     public static async Task HandleDatabaseArgumentsAsync(string[] args, WebApplication app)
     {
-        var createTables = ArgumentsConstain(args, "-ct", "--create-tables");
+        var create = ArgumentsConstain(args, "-ct", "--create-tables");
         var seed = ArgumentsConstain(args, "-s", "--seed");
+        var clear = ArgumentsConstain(args, "-c", "--clear");
 
-        if (!createTables && !seed) return;
+        if (!create && !seed && !clear) return;
 
         using var scope = app.Services.GetRequiredService<IServiceScopeFactory>().CreateScope();
 
         var dbConnection = scope.ServiceProvider.GetRequiredService<DapperDbConnection>();
         var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
 
-        if (createTables)
+        // Ensure Create Database
         {
             var connectionString = app.Configuration.GetConnectionString(CommonConstants.ConnectionStringName);
             logger.LogInformation("Creating Tables...");
             Database.Init(connectionString!);
             logger.LogInformation("Tables Were Created Successfully");
+        }
+
+        if (clear)
+        {
+            logger.LogInformation("Clearing...");
+            await Database.ClearAsync(dbConnection);
+            logger.LogInformation("Database Were Cleared Successfully");
         }
 
         if (seed)

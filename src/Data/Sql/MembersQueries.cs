@@ -25,4 +25,6 @@ public static class MembersQueries
         DELETE FROM {_table}
         WHERE "ChatId" = @ChatId AND "UserId" = @UserId;
     """;
+
+    public const string Clear = $"DELETE FROM {_table};";
 }
